@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,8 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ahmedadeltito.financetracker.ui.model.TransactionCategoryUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionTypeUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
+import com.ahmedadeltito.financetracker.ui.preview.PreviewData
 import com.ahmedadeltito.financetracker.ui.theme.Expense
 import com.ahmedadeltito.financetracker.ui.theme.FinanceTrackerTheme
 import com.ahmedadeltito.financetracker.ui.theme.Income
@@ -131,9 +134,10 @@ private fun TransactionCardIncomePreview() {
                 id = "1",
                 amount = "+$1,500.00",
                 formattedDate = "Jan 15, 2024",
-                category = TransactionUiModel.CategoryUiModel(
+                category = TransactionCategoryUiModel(
                     id = "1",
                     name = "Salary",
+                    type = TransactionTypeUiModel.Income,
                     color = Income,
                     icon = "S"
                 ),
@@ -155,9 +159,10 @@ private fun TransactionCardExpensePreview() {
                 id = "2",
                 amount = "-$50.00",
                 formattedDate = "Jan 15, 2024",
-                category = TransactionUiModel.CategoryUiModel(
+                category = TransactionCategoryUiModel(
                     id = "2",
                     name = "Food",
+                    type = TransactionTypeUiModel.Expense,
                     color = Expense,
                     icon = "F"
                 ),
@@ -180,9 +185,10 @@ private fun TransactionCardListPreview() {
                     id = "1",
                     amount = "+$1,500.00",
                     formattedDate = "Jan 15, 2024",
-                    category = TransactionUiModel.CategoryUiModel(
+                    category = TransactionCategoryUiModel(
                         id = "1",
                         name = "Salary",
+                        type = TransactionTypeUiModel.Income,
                         color = Income,
                         icon = "S"
                     ),
@@ -197,9 +203,10 @@ private fun TransactionCardListPreview() {
                     id = "2",
                     amount = "-$50.00",
                     formattedDate = "Jan 15, 2024",
-                    category = TransactionUiModel.CategoryUiModel(
+                    category = TransactionCategoryUiModel(
                         id = "2",
                         name = "Food",
+                        type = TransactionTypeUiModel.Expense,
                         color = Expense,
                         icon = "F"
                     ),
@@ -210,4 +217,17 @@ private fun TransactionCardListPreview() {
             )
         }
     }
-} 
+}
+
+@LightAndDarkPreview
+@Composable
+private fun TransactionCardPreview() {
+    FinanceTrackerTheme {
+        Surface {
+            TransactionCard(
+                transaction = PreviewData.sampleTransactions[0],
+                onClick = {}
+            )
+        }
+    }
+}
