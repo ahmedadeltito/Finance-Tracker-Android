@@ -1,6 +1,5 @@
 package com.ahmedadeltito.financetracker.ui.components
 
-import android.view.SurfaceControl.Transaction
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,7 @@ import com.ahmedadeltito.financetracker.domain.entity.Transaction
 import com.ahmedadeltito.financetracker.domain.entity.TransactionType
 import com.ahmedadeltito.financetracker.ui.theme.Expense
 import com.ahmedadeltito.financetracker.ui.theme.Income
+import com.ahmedadeltito.financetracker.ui.theme.Other
 import java.text.SimpleDateFormat
 import java.util.Locale
 import androidx.core.graphics.toColorInt
@@ -53,7 +53,7 @@ fun TransactionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CategoryIcon(
-                    categoryColor = Color((transaction.category.color ?: "#757575").toColorInt()),
+                    categoryColor = transaction.category.color?.let { Color(parseColor(it)) } ?: Other,
                     categoryName = transaction.category.name
                 )
                 Spacer(modifier = Modifier.width(12.dp))
@@ -85,7 +85,7 @@ fun TransactionCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -118,5 +118,19 @@ private fun formatAmount(amount: String, type: TransactionType): String {
     return when (type) {
         TransactionType.INCOME -> "+$amount"
         TransactionType.EXPENSE -> "-$amount"
+    }
+}
+
+private fun parseColor(colorString: String): Int {
+    return try {
+        // Handle both #RRGGBB and #AARRGGBB formats
+        val color = if (colorString.startsWith("#")) {
+            colorString
+        } else {
+            "#$colorString"
+        }
+        color.toColorInt()
+    } catch (e: IllegalArgumentException) {
+        android.graphics.Color.GRAY
     }
 } 
