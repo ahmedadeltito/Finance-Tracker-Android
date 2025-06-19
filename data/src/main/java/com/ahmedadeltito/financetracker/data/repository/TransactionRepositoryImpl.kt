@@ -60,20 +60,38 @@ class TransactionRepositoryImpl @Inject constructor(
         Result.Error(e)
     }
 
-    override suspend fun addTransaction(transaction: Transaction): Result<Transaction> = try {
-        val entity = transaction.toEntity()
-        transactionDao.insertTransaction(entity)
-        Result.Success(transaction)
-    } catch (e: Exception) {
-        Result.Error(e)
+    override suspend fun addTransaction(transaction: Transaction): Result<Transaction> {
+        return try {
+            val category = categoryDao.getCategoryById(transaction.category.id)
+                ?: return Result.Error(IllegalArgumentException("Category not found"))
+
+            if (category.isDeleted) {
+                return Result.Error(IllegalArgumentException("Cannot add transaction with deleted category"))
+            }
+
+            val entity = transaction.toEntity()
+            transactionDao.insertTransaction(entity)
+            Result.Success(transaction)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
-    override suspend fun updateTransaction(transaction: Transaction): Result<Transaction> = try {
-        val entity = transaction.toEntity()
-        transactionDao.updateTransaction(entity)
-        Result.Success(transaction)
-    } catch (e: Exception) {
-        Result.Error(e)
+    override suspend fun updateTransaction(transaction: Transaction): Result<Transaction> {
+        return try {
+            val category = categoryDao.getCategoryById(transaction.category.id)
+                ?: return Result.Error(IllegalArgumentException("Category not found"))
+
+            if (category.isDeleted) {
+                return Result.Error(IllegalArgumentException("Cannot update transaction with deleted category"))
+            }
+
+            val entity = transaction.toEntity()
+            transactionDao.updateTransaction(entity)
+            Result.Success(transaction)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 
     override suspend fun deleteTransaction(id: String): Result<Unit> = try {
@@ -89,15 +107,14 @@ class TransactionRepositoryImpl @Inject constructor(
         type: TransactionType,
         startDate: Date,
         endDate: Date
-    ): Flow<Result<BigDecimal>> =
-        transactionDao.getTransactionsByDateRange(startDate, endDate)
-            .map { transactions ->
-                transactions
-                    .filter { it.type == type }
-                    .fold(BigDecimal.ZERO) { acc, transaction -> acc + transaction.amount }
-            }
-            .map { Result.Success(it) }
-            .catch { Result.Error(it) }
+    ): Flow<Result<BigDecimal>> = transactionDao.getTransactionsByDateRange(startDate, endDate)
+        .map { transactions ->
+            transactions
+                .filter { it.type == type }
+                .fold(BigDecimal.ZERO) { acc, transaction -> acc + transaction.amount }
+        }
+        .map { Result.Success(it) }
+        .catch { Result.Error(it) }
 
     override fun getTransactionCategories(): Flow<Result<List<TransactionCategory>>> =
         categoryDao.getAllCategories()
