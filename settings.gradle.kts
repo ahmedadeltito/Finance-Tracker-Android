@@ -19,7 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FinanceTracker"
+rootProject.name = "Finance Tracker"
 include(":app")
-include(":data")
-include(":domain")
