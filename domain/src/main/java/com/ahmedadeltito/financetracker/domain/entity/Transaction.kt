@@ -39,25 +39,95 @@ data class TransactionCategory(
 ) {
     companion object {
         // Predefined categories for income
-        val SALARY = TransactionCategory("income_salary", "Salary", TransactionType.INCOME)
-        val INVESTMENT = TransactionCategory("income_investment", "Investment", TransactionType.INCOME)
-        val BONUS = TransactionCategory("income_bonus", "Bonus", TransactionType.INCOME)
-        val OTHER_INCOME = TransactionCategory("income_other", "Other", TransactionType.INCOME)
+        val SALARY = TransactionCategory(
+            id = "income_salary",
+            name = "Salary",
+            type = TransactionType.INCOME,
+            color = "#1E88E5" // Blue
+        )
+        val INVESTMENT = TransactionCategory(
+            id = "income_investment",
+            name = "Investment",
+            type = TransactionType.INCOME,
+            color = "#7CB342" // Light Green
+        )
+        val BONUS = TransactionCategory(
+            id = "income_bonus",
+            name = "Bonus",
+            type = TransactionType.INCOME,
+            color = "#FFB300" // Amber
+        )
+        val OTHER_INCOME = TransactionCategory(
+            id = "income_other",
+            name = "Other",
+            type = TransactionType.INCOME,
+            color = "#757575" // Grey
+        )
 
         // Predefined categories for expenses
-        val GROCERIES = TransactionCategory("expense_groceries", "Groceries", TransactionType.EXPENSE)
-        val BILLS = TransactionCategory("expense_bills", "Bills", TransactionType.EXPENSE)
-        val ENTERTAINMENT = TransactionCategory("expense_entertainment", "Entertainment", TransactionType.EXPENSE)
-        val TRAVEL = TransactionCategory("expense_travel", "Travel", TransactionType.EXPENSE)
-        val SHOPPING = TransactionCategory("expense_shopping", "Shopping", TransactionType.EXPENSE)
-        val HEALTH = TransactionCategory("expense_health", "Health", TransactionType.EXPENSE)
-        val TRANSPORT = TransactionCategory("expense_transport", "Transport", TransactionType.EXPENSE)
-        val OTHER_EXPENSE = TransactionCategory("expense_other", "Other", TransactionType.EXPENSE)
+        val GROCERIES = TransactionCategory(
+            id = "expense_groceries",
+            name = "Groceries",
+            type = TransactionType.EXPENSE,
+            color = "#E53935" // Red
+        )
+        val BILLS = TransactionCategory(
+            id = "expense_bills",
+            name = "Bills",
+            type = TransactionType.EXPENSE,
+            color = "#5E35B1" // Deep Purple
+        )
+        val ENTERTAINMENT = TransactionCategory(
+            id = "expense_entertainment",
+            name = "Entertainment",
+            type = TransactionType.EXPENSE,
+            color = "#FF7043" // Deep Orange
+        )
+        val TRAVEL = TransactionCategory(
+            id = "expense_travel",
+            name = "Travel",
+            type = TransactionType.EXPENSE,
+            color = "#039BE5" // Light Blue
+        )
+        val SHOPPING = TransactionCategory(
+            id = "expense_shopping",
+            name = "Shopping",
+            type = TransactionType.EXPENSE,
+            color = "#EC407A" // Pink
+        )
+        val HEALTH = TransactionCategory(
+            id = "expense_health",
+            name = "Health",
+            type = TransactionType.EXPENSE,
+            color = "#00ACC1" // Cyan
+        )
+        val TRANSPORT = TransactionCategory(
+            id = "expense_transport",
+            name = "Transport",
+            type = TransactionType.EXPENSE,
+            color = "#43A047" // Green
+        )
+        val OTHER_EXPENSE = TransactionCategory(
+            id = "expense_other",
+            name = "Other",
+            type = TransactionType.EXPENSE,
+            color = "#757575" // Grey
+        )
 
         // Default categories list
         val DEFAULT_CATEGORIES = listOf(
-            SALARY, INVESTMENT, BONUS, OTHER_INCOME,
-            GROCERIES, BILLS, ENTERTAINMENT, TRAVEL, SHOPPING, HEALTH, TRANSPORT, OTHER_EXPENSE
+            SALARY,
+            INVESTMENT,
+            BONUS,
+            OTHER_INCOME,
+            GROCERIES,
+            BILLS,
+            ENTERTAINMENT,
+            TRAVEL,
+            SHOPPING,
+            HEALTH,
+            TRANSPORT,
+            OTHER_EXPENSE
         )
     }
 } 
