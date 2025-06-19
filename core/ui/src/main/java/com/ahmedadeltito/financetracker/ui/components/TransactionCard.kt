@@ -21,19 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.ahmedadeltito.financetracker.domain.entity.Transaction
-import com.ahmedadeltito.financetracker.domain.entity.TransactionType
+import com.ahmedadeltito.financetracker.ui.model.TransactionTypeUiModel
+import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import com.ahmedadeltito.financetracker.ui.theme.Expense
+import com.ahmedadeltito.financetracker.ui.theme.FinanceTrackerTheme
 import com.ahmedadeltito.financetracker.ui.theme.Income
-import com.ahmedadeltito.financetracker.ui.theme.Other
-import java.text.SimpleDateFormat
-import java.util.Locale
-import androidx.core.graphics.toColorInt
 
 @Composable
 fun TransactionCard(
-    transaction: Transaction,
+    transaction: TransactionUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -53,8 +51,8 @@ fun TransactionCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CategoryIcon(
-                    categoryColor = transaction.category.color?.let { Color(parseColor(it)) } ?: Other,
-                    categoryName = transaction.category.name
+                    categoryColor = transaction.category.color,
+                    categoryIcon = transaction.category.icon
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
@@ -65,8 +63,7 @@ fun TransactionCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-                            .format(transaction.date),
+                        text = transaction.formattedDate,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -77,12 +74,23 @@ fun TransactionCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = formatAmount(transaction.amount.toString(), transaction.type),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (transaction.type == TransactionType.INCOME) Income else Expense,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = transaction.type.icon,
+                        contentDescription = transaction.type.displayText,
+                        tint = transaction.type.color,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = transaction.amount,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = transaction.type.color,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -97,11 +105,11 @@ fun TransactionCard(
 @Composable
 private fun CategoryIcon(
     categoryColor: Color,
-    categoryName: String,
+    categoryIcon: String,
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = categoryName.first().toString(),
+        text = categoryIcon,
         modifier = modifier
             .size(40.dp)
             .background(
@@ -114,23 +122,92 @@ private fun CategoryIcon(
     )
 }
 
-private fun formatAmount(amount: String, type: TransactionType): String {
-    return when (type) {
-        TransactionType.INCOME -> "+$amount"
-        TransactionType.EXPENSE -> "-$amount"
+@Preview(showBackground = true)
+@Composable
+private fun TransactionCardIncomePreview() {
+    FinanceTrackerTheme {
+        TransactionCard(
+            transaction = TransactionUiModel(
+                id = "1",
+                amount = "+$1,500.00",
+                formattedDate = "Jan 15, 2024",
+                category = TransactionUiModel.CategoryUiModel(
+                    id = "1",
+                    name = "Salary",
+                    color = Income,
+                    icon = "S"
+                ),
+                note = "Monthly salary",
+                type = TransactionTypeUiModel.Income
+            ),
+            onClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
-private fun parseColor(colorString: String): Int {
-    return try {
-        // Handle both #RRGGBB and #AARRGGBB formats
-        val color = if (colorString.startsWith("#")) {
-            colorString
-        } else {
-            "#$colorString"
+@Preview(showBackground = true)
+@Composable
+private fun TransactionCardExpensePreview() {
+    FinanceTrackerTheme {
+        TransactionCard(
+            transaction = TransactionUiModel(
+                id = "2",
+                amount = "-$50.00",
+                formattedDate = "Jan 15, 2024",
+                category = TransactionUiModel.CategoryUiModel(
+                    id = "2",
+                    name = "Food",
+                    color = Expense,
+                    icon = "F"
+                ),
+                note = "Lunch",
+                type = TransactionTypeUiModel.Expense
+            ),
+            onClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TransactionCardListPreview() {
+    FinanceTrackerTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TransactionCard(
+                transaction = TransactionUiModel(
+                    id = "1",
+                    amount = "+$1,500.00",
+                    formattedDate = "Jan 15, 2024",
+                    category = TransactionUiModel.CategoryUiModel(
+                        id = "1",
+                        name = "Salary",
+                        color = Income,
+                        icon = "S"
+                    ),
+                    note = "Monthly salary",
+                    type = TransactionTypeUiModel.Income
+                ),
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            TransactionCard(
+                transaction = TransactionUiModel(
+                    id = "2",
+                    amount = "-$50.00",
+                    formattedDate = "Jan 15, 2024",
+                    category = TransactionUiModel.CategoryUiModel(
+                        id = "2",
+                        name = "Food",
+                        color = Expense,
+                        icon = "F"
+                    ),
+                    note = "Lunch",
+                    type = TransactionTypeUiModel.Expense
+                ),
+                onClick = {}
+            )
         }
-        color.toColorInt()
-    } catch (e: IllegalArgumentException) {
-        android.graphics.Color.GRAY
     }
 } 
