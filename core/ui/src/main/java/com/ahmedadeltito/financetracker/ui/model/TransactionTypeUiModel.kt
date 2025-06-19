@@ -10,14 +10,12 @@ sealed class TransactionTypeUiModel(
     val displayText: String,
     val color: Color,
     val amountPrefix: String,
-    val isIncome: Boolean,
     val icon: ImageVector
 ) {
     data object Income : TransactionTypeUiModel(
         displayText = "Income",
         color = com.ahmedadeltito.financetracker.ui.theme.Income,
         amountPrefix = "+",
-        isIncome = true,
         icon = Icons.AutoMirrored.Filled.ArrowForward
     )
 
@@ -25,14 +23,6 @@ sealed class TransactionTypeUiModel(
         displayText = "Expense",
         color = com.ahmedadeltito.financetracker.ui.theme.Expense,
         amountPrefix = "-",
-        isIncome = false,
         icon = Icons.AutoMirrored.Filled.ArrowBack
     )
-
-    companion object {
-        fun values(): List<TransactionTypeUiModel> = listOf(Income, Expense)
-
-        fun getByIsIncome(isIncome: Boolean): TransactionTypeUiModel =
-            if (isIncome) Income else Expense
-    }
 } 

@@ -2,14 +2,21 @@ package com.ahmedadeltito.financetracker.ui.mapper
 
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
+import androidx.core.net.ParseException
 import com.ahmedadeltito.financetracker.domain.entity.Transaction
 import com.ahmedadeltito.financetracker.domain.entity.TransactionCategory
+import com.ahmedadeltito.financetracker.domain.entity.TransactionType
+import com.ahmedadeltito.financetracker.ui.mapper.TransactionTypeMapper.toUiModel
+import com.ahmedadeltito.financetracker.ui.model.TransactionCategoryUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionTypeUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import com.ahmedadeltito.financetracker.ui.theme.Other
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
+import java.math.BigDecimal
+import java.util.Date
+import java.util.UUID
 
 object TransactionMapper {
     fun Transaction.toUiModel(): TransactionUiModel {
@@ -24,21 +31,32 @@ object TransactionMapper {
         )
     }
 
-    private fun TransactionCategory.toUiModel(): TransactionUiModel.CategoryUiModel {
-        return TransactionUiModel.CategoryUiModel(
+    fun formatDate(date: Date): String {
+        val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        return dateFormatter.format(date)
+    }
+
+    fun parseDateString(dateString: String): Date {
+        val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        return try {
+            dateFormatter.parse(dateString)
+        } catch (e: ParseException) {
+            println("Error parsing date string: '$dateString'. ${e.message}")
+            Date()
+        }
+    }
+
+    fun TransactionCategory.toUiModel(): TransactionCategoryUiModel {
+        return TransactionCategoryUiModel(
             id = id,
             name = name,
+            type = type.toUiModel(),
             color = parseColor(color),
             icon = iconUrl ?: name.first().toString()
         )
     }
 
-    private fun formatDate(date: java.util.Date): String {
-        val dateFormatter = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
-        return dateFormatter.format(date)
-    }
-
-    private fun formatAmount(amount: java.math.BigDecimal, type: TransactionTypeUiModel): String {
+    private fun formatAmount(amount: BigDecimal, type: TransactionTypeUiModel): String {
         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
             maximumFractionDigits = 2
             minimumFractionDigits = 2
@@ -57,5 +75,33 @@ object TransactionMapper {
         Color(color.toColorInt())
     } catch (e: IllegalArgumentException) {
         Other
+    }
+
+    fun fromFormData(
+        id: String,
+        amount: BigDecimal,
+        description: String,
+        date: Date,
+        type: TransactionTypeUiModel,
+        categoryId: String,
+        currency: String = "USD"
+    ): Transaction {
+        val type = when (type) {
+            TransactionTypeUiModel.Income -> TransactionType.INCOME
+            TransactionTypeUiModel.Expense -> TransactionType.EXPENSE
+        }
+        return Transaction(
+            id = id,
+            type = type,
+            amount = amount,
+            currency = currency,
+            category = TransactionCategory(
+                id = categoryId,
+                name = "", // This will be filled by the repository
+                type = type
+            ),
+            date = date,
+            notes = description
+        )
     }
 }

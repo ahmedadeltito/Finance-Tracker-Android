@@ -6,14 +6,24 @@ data class TransactionUiModel(
     val id: String,
     val amount: String, // Pre-formatted amount with currency symbol and +/- sign
     val formattedDate: String, // Pre-formatted date string
-    val category: CategoryUiModel,
+    val category: TransactionCategoryUiModel,
     val note: String?,
     val type: TransactionTypeUiModel
 ) {
-    data class CategoryUiModel(
-        val id: String,
-        val name: String,
-        val color: Color, // Already parsed Color instead of String
-        val icon: String // First letter of category name, pre-computed
-    )
+    companion object {
+        val EMPTY = TransactionUiModel(
+            id = "",
+            amount = "",
+            formattedDate = "",
+            category = TransactionCategoryUiModel(
+                id = "",
+                name = "",
+                type = TransactionTypeUiModel.Income,
+                color = Color.Unspecified,
+                icon = ""
+            ),
+            note = null,
+            type = TransactionTypeUiModel.Income
+        )
+    }
 } 
