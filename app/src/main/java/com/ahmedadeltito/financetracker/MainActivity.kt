@@ -3,8 +3,15 @@ package com.ahmedadeltito.financetracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
-import com.ahmedadeltito.financetracker.feature.transactions.ui.TransactionListScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.addTransactionScreen
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.navigateToAddTransaction
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.navigateToEditTransaction
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.transactionsScreen
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.updateTransactionScreen
 import com.ahmedadeltito.financetracker.ui.theme.FinanceTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -12,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             FinanceTrackerApp()
         }
@@ -21,9 +29,21 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun FinanceTrackerApp() {
     FinanceTrackerTheme {
-        TransactionListScreen(
-            onNavigateToTransactionDetails = { /* TODO: Implement navigation */ },
-            onNavigateToAddTransaction = { /* TODO: Implement navigation */ }
-        )
+        val navController = rememberNavController()
+        NavHost(
+            navController = navController,
+            startDestination = "transactions_route"
+        ) {
+            transactionsScreen(
+                onNavigateToAddTransaction = { navController.navigateToAddTransaction() },
+                onNavigateToEditTransaction = { navController.navigateToEditTransaction(it) }
+            )
+            addTransactionScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+            updateTransactionScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
     }
 }
