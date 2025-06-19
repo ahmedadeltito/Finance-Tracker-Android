@@ -1,6 +1,7 @@
 package com.ahmedadeltito.financetracker.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ahmedadeltito.financetracker.domain.entity.Transaction
 import com.ahmedadeltito.financetracker.domain.entity.TransactionCategory
@@ -10,6 +11,9 @@ import java.util.Date
 
 @Entity(
     tableName = "transactions",
+    indices = [
+        Index(value = ["categoryId"])
+    ],
     foreignKeys = [
         androidx.room.ForeignKey(
             entity = TransactionCategoryEntity::class,
