@@ -1,22 +1,17 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "com.ahmedadeltito.financetracker"
+    namespace = "com.ahmedadeltito.financetracker.ui"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.ahmedadeltito.financetracker"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,38 +38,26 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
-    implementation(project(":core:ui"))
-    implementation(project(":core:navigation"))
-    implementation(project(":data"))
-    implementation(project(":domain"))
-    implementation(project(":feature:transactions"))
-    implementation(project(":feature:currency-conversion"))
 
+    // AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
 
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-
-    // Lifecycle
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-}
+} 
