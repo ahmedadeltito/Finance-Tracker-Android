@@ -12,7 +12,8 @@ data class TransactionCategoryEntity(
     val name: String,
     val type: TransactionType,
     val iconUrl: String?,
-    val color: String?
+    val color: String?,
+    val isDeleted: Boolean = false
 ) {
     companion object {
         fun TransactionCategoryEntity.toDomain(): TransactionCategory = TransactionCategory(
@@ -22,12 +23,14 @@ data class TransactionCategoryEntity(
             iconUrl = iconUrl,
             color = color
         )
-        fun TransactionCategory.toEntity(): TransactionCategoryEntity = TransactionCategoryEntity(
+
+        fun TransactionCategory.toEntity(isDeleted: Boolean = false): TransactionCategoryEntity = TransactionCategoryEntity(
             id = id,
             name = name,
             type = type,
             iconUrl = iconUrl,
-            color = color
+            color = color,
+            isDeleted = isDeleted
         )
     }
 } 

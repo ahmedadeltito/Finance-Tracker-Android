@@ -9,12 +9,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionCategoryDao {
-    @Query("SELECT * FROM transaction_categories ORDER BY name ASC")
+    @Query("SELECT * FROM transaction_categories WHERE isDeleted = 0 ORDER BY name ASC")
     fun getAllCategories(): Flow<List<TransactionCategoryEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: TransactionCategoryEntity): Long
 
-    @Query("SELECT * FROM transaction_categories WHERE id = :id")
+    @Query("SELECT * FROM transaction_categories WHERE id = :id AND isDeleted = 0")
     suspend fun getCategoryById(id: String): TransactionCategoryEntity?
 } 
