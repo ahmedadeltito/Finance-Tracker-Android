@@ -11,10 +11,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface CurrencyConversionRepositoryModule {
-
     @Binds
     @Singleton
-    fun bindExchangeRateRepository(
-        repository: ExchangeRateRepositoryImpl
-    ): ExchangeRateRepository
+    fun bindExchangeRateRepository(repository: ExchangeRateRepositoryImpl): ExchangeRateRepository
 }

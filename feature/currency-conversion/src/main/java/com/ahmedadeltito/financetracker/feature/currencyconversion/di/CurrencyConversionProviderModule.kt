@@ -11,7 +11,6 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(SingletonComponent::class)
 interface CurrencyConversionProviderModule {
-
     @Binds
     @IntoSet
     fun frankfurterProviderIntoSet(provider: FrankfurterExchangeRateProvider): ExchangeRateProviderPort

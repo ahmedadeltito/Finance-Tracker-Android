@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.ahmedadeltito.financetracker.common.NoParameters
 import com.ahmedadeltito.financetracker.common.Result
 import com.ahmedadeltito.financetracker.common.di.CoroutineDispatchers
-import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.entity.Currency
 import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.usecase.ConvertCurrencyUseCase
 import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.usecase.ExchangeRatesProvidersUseCase
 import com.ahmedadeltito.financetracker.feature.currencyconversion.ui.CurrencyConverterState.Input
@@ -53,16 +52,12 @@ class CurrencyConverterViewModel @Inject constructor(
         when (event) {
             is CurrencyConverterEvent.OnAmountChange ->
                 _state.value = currentInput().copy(amount = event.amount)
-
             is CurrencyConverterEvent.OnFromCurrencyChange ->
-                _state.value = currentInput().copy(from = event.currency)
-
+                _state.value = currentInput().copy(fromCode = event.currencyCode)
             is CurrencyConverterEvent.OnToCurrencyChange ->
-                _state.value = currentInput().copy(to = event.currency)
-
+                _state.value = currentInput().copy(toCode = event.currencyCode)
             is CurrencyConverterEvent.OnProviderChange ->
                 _state.value = currentInput().copy(selectedProviderId = event.providerId)
-
             is CurrencyConverterEvent.OnConvertClick -> convert()
         }
     }
@@ -72,14 +67,14 @@ class CurrencyConverterViewModel @Inject constructor(
     private fun convert() {
         val input = currentInput()
         val providerId = input.selectedProviderId ?: return
-        val from = input.from ?: return
-        val to = input.to ?: return
+        val fromCode = input.fromCode ?: return
+        val toCode = input.toCode ?: return
         val amount = input.amount.toBigDecimalOrNull() ?: return
 
         val params = ConvertCurrencyUseCase.Params(
             providerId = providerId,
-            from = from,
-            to = to,
+            fromCode = fromCode,
+            toCode = toCode,
             amount = amount
         )
 
@@ -99,8 +94,8 @@ class CurrencyConverterViewModel @Inject constructor(
 
 sealed interface CurrencyConverterEvent {
     data class OnAmountChange(val amount: String) : CurrencyConverterEvent
-    data class OnFromCurrencyChange(val currency: Currency) : CurrencyConverterEvent
-    data class OnToCurrencyChange(val currency: Currency) : CurrencyConverterEvent
+    data class OnFromCurrencyChange(val currencyCode: String) : CurrencyConverterEvent
+    data class OnToCurrencyChange(val currencyCode: String) : CurrencyConverterEvent
     data class OnProviderChange(val providerId: String) : CurrencyConverterEvent
     object OnConvertClick : CurrencyConverterEvent
 }
@@ -108,8 +103,8 @@ sealed interface CurrencyConverterEvent {
 sealed interface CurrencyConverterState {
     data class Input(
         val amount: String = "",
-        val from: Currency? = null,
-        val to: Currency? = null,
+        val fromCode: String? = null,
+        val toCode: String? = null,
         val providerOptions: List<Pair<String, String>> = emptyList(),
         val selectedProviderId: String? = null,
     ) : CurrencyConverterState

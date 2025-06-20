@@ -1,7 +1,6 @@
 package com.ahmedadeltito.financetracker.feature.currencyconversion.domain.repository
 
 import com.ahmedadeltito.financetracker.common.Result
-import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.port.ExchangeRateProviderPort
 import java.math.BigDecimal
 
 interface ExchangeRateRepository {

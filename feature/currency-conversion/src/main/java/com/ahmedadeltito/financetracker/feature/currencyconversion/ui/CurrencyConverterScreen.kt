@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.entity.Currency
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -55,22 +54,16 @@ fun CurrencyConverterScreen(
                 )
                 // For brevity, using simple text fields for currency codes.
                 OutlinedTextField(
-                    value = uiState.from?.code ?: "",
+                    value = uiState.fromCode ?: "",
                     onValueChange = {
-                        onEvent(
-                            CurrencyConverterEvent.OnFromCurrencyChange(
-                                Currency(
-                                    it
-                                )
-                            )
-                        )
+                        onEvent(CurrencyConverterEvent.OnFromCurrencyChange(currencyCode = it))
                     },
                     label = { Text("From Currency (e.g. USD)") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
-                    value = uiState.to?.code ?: "",
-                    onValueChange = { onEvent(CurrencyConverterEvent.OnToCurrencyChange(Currency(it))) },
+                    value = uiState.toCode ?: "",
+                    onValueChange = { onEvent(CurrencyConverterEvent.OnToCurrencyChange(currencyCode = it)) },
                     label = { Text("To Currency (e.g. EUR)") },
                     modifier = Modifier.fillMaxWidth()
                 )

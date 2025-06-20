@@ -3,7 +3,6 @@ package com.ahmedadeltito.financetracker.feature.currencyconversion.domain.useca
 import com.ahmedadeltito.financetracker.common.Result
 import com.ahmedadeltito.financetracker.common.SuspendUseCase
 import com.ahmedadeltito.financetracker.common.di.IoDispatcher
-import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.entity.Currency
 import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.repository.ExchangeRateRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import java.math.BigDecimal
@@ -17,8 +16,8 @@ class ConvertCurrencyUseCase @Inject constructor(
     override suspend fun execute(params: Params): BigDecimal =
         repository.convert(
             providerId = params.providerId,
-            fromCurrencyCode = params.from.code,
-            toCurrencyCode = params.to.code,
+            fromCurrencyCode = params.fromCode,
+            toCurrencyCode = params.toCode,
             amount = params.amount
         ).let { result ->
             when (result) {
@@ -30,8 +29,8 @@ class ConvertCurrencyUseCase @Inject constructor(
 
     data class Params(
         val providerId: String,
-        val from: Currency,
-        val to: Currency,
+        val fromCode: String,
+        val toCode: String,
         val amount: BigDecimal
     )
 } 
