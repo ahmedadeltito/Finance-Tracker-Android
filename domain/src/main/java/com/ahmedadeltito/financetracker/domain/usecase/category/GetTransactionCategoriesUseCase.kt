@@ -2,7 +2,6 @@ package com.ahmedadeltito.financetracker.domain.usecase.category
 
 import com.ahmedadeltito.financetracker.common.FlowUseCase
 import com.ahmedadeltito.financetracker.common.NoParameters
-import com.ahmedadeltito.financetracker.common.Result
 import com.ahmedadeltito.financetracker.common.di.IoDispatcher
 import com.ahmedadeltito.financetracker.domain.entity.TransactionCategory
 import com.ahmedadeltito.financetracker.domain.repository.TransactionRepository
@@ -12,10 +11,9 @@ import javax.inject.Inject
 
 class GetTransactionCategoriesUseCase @Inject constructor(
     private val transactionRepository: TransactionRepository,
-    @IoDispatcher dispatcher: CoroutineDispatcher
-) : FlowUseCase<NoParameters, List<TransactionCategory>>(dispatcher) {
+    @IoDispatcher override val dispatcher: CoroutineDispatcher
+) : FlowUseCase<NoParameters, List<TransactionCategory>> {
 
-    override fun execute(parameters: NoParameters): Flow<Result<List<TransactionCategory>>> {
-        return transactionRepository.getTransactionCategories()
-    }
+    override fun execute(params: NoParameters): Flow<List<TransactionCategory>> =
+        transactionRepository.getTransactionCategories()
 } 

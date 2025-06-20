@@ -1,5 +1,4 @@
-package com.ahmedadeltito.financetracker.feature.transactions.ui.model
-
+package com.ahmedadeltito.financetracker.ui.model
 
 data class ValidationState(
     val amountError: String? = null,

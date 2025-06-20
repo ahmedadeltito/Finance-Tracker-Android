@@ -57,10 +57,12 @@ fun NavGraphBuilder.transactionsScreen(
                     is TransactionListSideEffect.NavigateToAddTransaction ->
                         onNavigateToAddTransaction()
                     is TransactionListSideEffect.ShowUndoSnackbar -> {
+                        val actionLabel = if (effect.transactionId != null) "Undo" else null
+                        val duration = if (effect.transactionId != null) SnackbarDuration.Long else SnackbarDuration.Short
                         val result = snackbarHostState.showSnackbar(
                             message = effect.message,
-                            actionLabel = if (effect.transactionId != null) "Undo" else null,
-                            duration = SnackbarDuration.Long
+                            actionLabel = actionLabel,
+                            duration = duration
                         )
                         when (result) {
                             SnackbarResult.Dismissed -> effect.transactionId?.let {
@@ -138,9 +140,7 @@ fun NavGraphBuilder.updateTransactionScreen(
             viewModel.sideEffect.collectLatest { effect ->
                 when (effect) {
                     is UpdateTransactionSideEffect.NavigateBack -> onNavigateBack()
-                    is UpdateTransactionSideEffect.ShowSuccess -> snackbarHostState.showSnackbar(
-                        effect.message
-                    )
+                    is UpdateTransactionSideEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }

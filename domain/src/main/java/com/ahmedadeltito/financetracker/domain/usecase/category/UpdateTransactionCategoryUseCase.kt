@@ -7,13 +7,13 @@ import com.ahmedadeltito.financetracker.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import javax.inject.Inject
 
-class AddTransactionCategoryUseCase @Inject constructor(
+class UpdateTransactionCategoryUseCase @Inject constructor(
     private val transactionRepository: TransactionRepository,
     @IoDispatcher override val dispatcher: CoroutineDispatcher
-) : SuspendUseCase<AddTransactionCategoryUseCase.Params, TransactionCategory> {
+) : SuspendUseCase<UpdateTransactionCategoryUseCase.Params, TransactionCategory> {
 
     override suspend fun execute(params: Params): TransactionCategory =
-        transactionRepository.addTransactionCategory(params.category)
+        transactionRepository.updateTransactionCategory(params.category)
 
     data class Params(val category: TransactionCategory)
 } 

@@ -4,33 +4,40 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
-abstract class UseCase<in P, R>(private val coroutineDispatcher: CoroutineDispatcher) {
+/**
+ * Contract for a suspend use-case that returns a single value.
+ * Implement [execute] and provide a [dispatcher]; the default invoke handles
+ * context switching and Result wrapping.
+ */
+interface SuspendUseCase<P, R> {
+    val dispatcher: CoroutineDispatcher
 
-    suspend operator fun invoke(parameters: P): Result<R> {
-        return try {
-            withContext(coroutineDispatcher) {
-                execute(parameters).let {
-                    Result.success(it)
-                }
-            }
-        } catch (e: Exception) {
-            Result.error(e)
-        }
+    suspend operator fun invoke(params: P): Result<R> = try {
+        withContext(dispatcher) { Result.success(execute(params)) }
+    } catch (e: Exception) {
+        Result.error(e)
     }
 
-    @Throws(RuntimeException::class)
-    protected abstract suspend fun execute(parameters: P): R
+    suspend fun execute(params: P): R
 }
 
-abstract class FlowUseCase<in P, R>(private val coroutineDispatcher: CoroutineDispatcher) {
+/**
+ * Contract for a Flow-based use-case.
+ * Implement [execute] returning a plain Flow<R>; the default invoke switches
+ * dispatcher and wraps each emission/error into Result.
+ */
+interface FlowUseCase<P, R> {
+    val dispatcher: CoroutineDispatcher
 
-    operator fun invoke(parameters: P): Flow<Result<R>> = execute(parameters)
-        .catch { e -> emit(Result.error(Exception(e))) }
-        .flowOn(coroutineDispatcher)
+    operator fun invoke(params: P): Flow<Result<R>> = execute(params)
+        .map { Result.success(it) }
+        .catch { e -> emit(Result.error(e)) }
+        .flowOn(dispatcher)
 
-    protected abstract fun execute(parameters: P): Flow<Result<R>>
+    fun execute(params: P): Flow<R>
 }
 
 object NoParameters 

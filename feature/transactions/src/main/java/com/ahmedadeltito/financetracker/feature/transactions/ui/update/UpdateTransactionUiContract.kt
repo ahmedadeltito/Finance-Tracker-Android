@@ -1,6 +1,7 @@
 package com.ahmedadeltito.financetracker.feature.transactions.ui.update
 
-import com.ahmedadeltito.financetracker.feature.transactions.ui.model.ValidationState
+import com.ahmedadeltito.financetracker.feature.transactions.common.TransactionFormSuccess
+import com.ahmedadeltito.financetracker.ui.model.ValidationState
 import com.ahmedadeltito.financetracker.ui.model.TransactionCategoryUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionTypeUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
@@ -10,10 +11,10 @@ sealed interface UpdateTransactionState {
     data object Loading : UpdateTransactionState
 
     data class Success(
-        val transaction: TransactionUiModel = TransactionUiModel.EMPTY,
-        val categories: List<TransactionCategoryUiModel> = emptyList(),
-        val validation: ValidationState = ValidationState()
-    ) : UpdateTransactionState
+        override val transaction: TransactionUiModel = TransactionUiModel.EMPTY,
+        override val categories: List<TransactionCategoryUiModel> = emptyList(),
+        override val validation: ValidationState = ValidationState()
+    ) : UpdateTransactionState, TransactionFormSuccess
 
     data class Error(
         val message: String

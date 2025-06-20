@@ -1,6 +1,5 @@
 package com.ahmedadeltito.financetracker.domain.repository
 
-import com.ahmedadeltito.financetracker.common.Result
 import com.ahmedadeltito.financetracker.domain.entity.Transaction
 import com.ahmedadeltito.financetracker.domain.entity.TransactionCategory
 import com.ahmedadeltito.financetracker.domain.entity.TransactionType
@@ -16,42 +15,42 @@ interface TransactionRepository {
     /**
      * Get all transactions as a Flow, ordered by date descending.
      */
-    fun getTransactions(): Flow<Result<List<Transaction>>>
+    fun getTransactions(): Flow<List<Transaction>>
 
     /**
      * Get transactions for a specific time period.
      */
-    fun getTransactionsByDateRange(startDate: Date, endDate: Date): Flow<Result<List<Transaction>>>
+    fun getTransactionsByDateRange(startDate: Date, endDate: Date): Flow<List<Transaction>>
 
     /**
      * Get transactions by type (Income or Expense).
      */
-    fun getTransactionsByType(type: TransactionType): Flow<Result<List<Transaction>>>
+    fun getTransactionsByType(type: TransactionType): Flow<List<Transaction>>
 
     /**
      * Get transactions by category.
      */
-    fun getTransactionsByCategory(categoryId: String): Flow<Result<List<Transaction>>>
+    fun getTransactionsByCategory(categoryId: String): Flow<List<Transaction>>
 
     /**
      * Get a single transaction by ID.
      */
-    suspend fun getTransactionById(id: String): Result<Transaction>
+    suspend fun getTransactionById(id: String): Transaction
 
     /**
      * Add a new transaction.
      */
-    suspend fun addTransaction(transaction: Transaction): Result<Transaction>
+    suspend fun addTransaction(transaction: Transaction): Transaction
 
     /**
      * Update an existing transaction.
      */
-    suspend fun updateTransaction(transaction: Transaction): Result<Transaction>
+    suspend fun updateTransaction(transaction: Transaction): Transaction
 
     /**
      * Delete a transaction.
      */
-    suspend fun deleteTransaction(id: String): Result<Unit>
+    suspend fun deleteTransaction(id: String)
 
     /**
      * Get total amount for a specific transaction type in a date range.
@@ -60,26 +59,26 @@ interface TransactionRepository {
         type: TransactionType,
         startDate: Date,
         endDate: Date
-    ): Flow<Result<BigDecimal>>
+    ): Flow<BigDecimal>
 
     /**
      * Get all transaction categories.
      */
-    fun getTransactionCategories(): Flow<Result<List<TransactionCategory>>>
+    fun getTransactionCategories(): Flow<List<TransactionCategory>>
 
     /**
      * Add a new custom category.
      */
-    suspend fun addTransactionCategory(category: TransactionCategory): Result<TransactionCategory>
+    suspend fun addTransactionCategory(category: TransactionCategory): TransactionCategory
 
     /**
      * Update an existing category.
      */
-    suspend fun updateTransactionCategory(category: TransactionCategory): Result<TransactionCategory>
+    suspend fun updateTransactionCategory(category: TransactionCategory): TransactionCategory
 
     /**
      * Delete a custom category.
      * Note: Default categories cannot be deleted.
      */
-    suspend fun deleteTransactionCategory(id: String): Result<Unit>
+    suspend fun deleteTransactionCategory(id: String)
 } 
