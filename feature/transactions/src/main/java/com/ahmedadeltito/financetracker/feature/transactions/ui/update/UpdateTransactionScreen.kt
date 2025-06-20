@@ -119,7 +119,6 @@ fun UpdateTransactionScreen(
                         onCategorySelected = { onEvent(OnCategorySelect(it)) },
                         error = uiState.validation.categoryError
                     )
-                    Spacer(modifier = Modifier.height(32.dp))
                     // Update Button
                     PrimaryButton(
                         onClick = { onEvent(OnUpdateClick) },

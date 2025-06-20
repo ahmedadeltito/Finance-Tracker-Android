@@ -16,7 +16,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.math.BigDecimal
 import java.util.Date
-import java.util.UUID
 
 object TransactionMapper {
     fun Transaction.toUiModel(): TransactionUiModel {
@@ -27,7 +26,8 @@ object TransactionMapper {
             formattedDate = formatDate(date),
             category = category.toUiModel(),
             note = notes.orEmpty(),
-            type = transactionType
+            type = transactionType,
+            isSoftDeleted = false
         )
     }
 

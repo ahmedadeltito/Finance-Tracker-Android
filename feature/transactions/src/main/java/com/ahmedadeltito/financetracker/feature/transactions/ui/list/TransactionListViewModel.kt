@@ -60,7 +60,7 @@ class TransactionListViewModel @Inject constructor(
     fun onEvent(event: TransactionListEvent) {
         when (event) {
             is Refresh -> loadTransactionsAndStats()
-            is SoftDeleteTransaction -> loadTransaction(event.transactionId)
+            is SoftDeleteTransaction -> softDeleteTransaction(event.transactionId)
             is HardDeleteTransaction -> deleteTransaction(transactionToBeDeleted)
             is UndoDelete -> undoDelete()
             is OnTransactionClick -> viewModelScope.launch(dispatchers.main) {
@@ -145,16 +145,22 @@ class TransactionListViewModel @Inject constructor(
         }
     }
 
-    private fun loadTransaction(transactionId: String) {
+    private fun softDeleteTransaction(transactionId: String) {
         viewModelScope.launch(dispatchers.io) {
             when (val result = getTransactionUseCase(GetTransactionUseCase.Params(transactionId))) {
                 is Result.Loading -> _state.value = TransactionListState.Loading
                 is Result.Success<Transaction> -> {
-                    transactionToBeDeleted = result.data.toUiModel()
+                    transactionToBeDeleted = result.data.toUiModel().copy(isSoftDeleted = true)
+
+                    val currentState = _state.value as? TransactionListState.Success ?: return@launch
+                    _state.value = currentState.copy(
+                        transactions = currentState.transactions.filterNot { it.id == transactionId }
+                    )
+
                     _sideEffect.send(
                         ShowUndoSnackbar(
                             transactionId = transactionToBeDeleted.id,
-                            message = "Transaction is being deleted",
+                            message = "Transaction deleted",
                         )
                     )
                 }

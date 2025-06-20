@@ -8,7 +8,8 @@ data class TransactionUiModel(
     val formattedDate: String, // Pre-formatted date string
     val category: TransactionCategoryUiModel,
     val note: String?,
-    val type: TransactionTypeUiModel
+    val type: TransactionTypeUiModel,
+    val isSoftDeleted: Boolean = false
 ) {
     companion object {
         val EMPTY = TransactionUiModel(
@@ -23,7 +24,8 @@ data class TransactionUiModel(
                 icon = ""
             ),
             note = null,
-            type = TransactionTypeUiModel.Income
+            type = TransactionTypeUiModel.Income,
+            isSoftDeleted = false
         )
     }
 } 
