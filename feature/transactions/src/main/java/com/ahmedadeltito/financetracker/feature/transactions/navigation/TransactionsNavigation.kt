@@ -1,20 +1,25 @@
 package com.ahmedadeltito.financetracker.feature.transactions.navigation
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionScreen
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionSideEffect
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionViewModel
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListScreen
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListViewModel
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionScreen
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionSideEffect
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionViewModel
@@ -38,9 +43,40 @@ fun NavGraphBuilder.transactionsScreen(
     onNavigateToEditTransaction: (String) -> Unit
 ) {
     composable(route = transactionsRoute) {
+
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        val viewModel: TransactionListViewModel = hiltViewModel()
+        val uiState by viewModel.state.collectAsStateWithLifecycle()
+
+        LaunchedEffect(key1 = true) {
+            viewModel.sideEffect.collect { effect ->
+                when (effect) {
+                    is TransactionListSideEffect.NavigateToTransactionDetails ->
+                        onNavigateToEditTransaction(effect.transactionId)
+                    is TransactionListSideEffect.NavigateToAddTransaction ->
+                        onNavigateToAddTransaction()
+                    is TransactionListSideEffect.ShowUndoSnackbar -> {
+                        val result = snackbarHostState.showSnackbar(
+                            message = effect.message,
+                            actionLabel = if (effect.transactionId != null) "Undo" else null,
+                            duration = SnackbarDuration.Long
+                        )
+                        when (result) {
+                            SnackbarResult.Dismissed -> effect.transactionId?.let {
+                                viewModel.onEvent(TransactionListEvent.HardDeleteTransaction(it))
+                            }
+                            SnackbarResult.ActionPerformed -> viewModel.onEvent(TransactionListEvent.UndoDelete)
+                        }
+                    }
+                }
+            }
+        }
+
         TransactionListScreen(
-            onNavigateToAddTransaction = onNavigateToAddTransaction,
-            onNavigateToTransactionDetails = onNavigateToEditTransaction
+            snackbarHostState = snackbarHostState,
+            uiState = uiState,
+            onEvent = viewModel::onEvent
         )
     }
 }
@@ -102,7 +138,9 @@ fun NavGraphBuilder.updateTransactionScreen(
             viewModel.sideEffect.collectLatest { effect ->
                 when (effect) {
                     is UpdateTransactionSideEffect.NavigateBack -> onNavigateBack()
-                    is UpdateTransactionSideEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
+                    is UpdateTransactionSideEffect.ShowSuccess -> snackbarHostState.showSnackbar(
+                        effect.message
+                    )
                 }
             }
         }

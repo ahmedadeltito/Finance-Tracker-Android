@@ -21,11 +21,16 @@ sealed interface TransactionListEvent {
     data object Refresh : TransactionListEvent
     data class OnTransactionClick(val transactionId: String) : TransactionListEvent
     data object OnAddTransactionClick : TransactionListEvent
-    data class DeleteTransaction(val transactionId: String) : TransactionListEvent
+    data class SoftDeleteTransaction(val transactionId: String) : TransactionListEvent
+    data class HardDeleteTransaction(val transactionId: String) : TransactionListEvent
+    data object UndoDelete : TransactionListEvent
 }
 
 sealed interface TransactionListSideEffect {
     data class NavigateToTransactionDetails(val transactionId: String) : TransactionListSideEffect
     data object NavigateToAddTransaction : TransactionListSideEffect
-    data class ShowSnackbar(val message: String) : TransactionListSideEffect
+    data class ShowUndoSnackbar(
+        val transactionId: String?,
+        val message: String
+    ) : TransactionListSideEffect
 } 

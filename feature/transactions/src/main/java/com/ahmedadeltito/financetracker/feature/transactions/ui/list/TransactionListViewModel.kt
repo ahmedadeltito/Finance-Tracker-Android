@@ -4,11 +4,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ahmedadeltito.financetracker.common.Result
 import com.ahmedadeltito.financetracker.common.di.CoroutineDispatchers
+import com.ahmedadeltito.financetracker.domain.entity.Transaction
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.DeleteTransactionUseCase
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionStatsUseCase
+import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionsUseCase
-import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionsUseCase.Params
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.HardDeleteTransaction
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnAddTransactionClick
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnTransactionClick
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.Refresh
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.SoftDeleteTransaction
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.UndoDelete
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect.NavigateToAddTransaction
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect.NavigateToTransactionDetails
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect.ShowUndoSnackbar
 import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.toUiModel
+import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
+import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel.Companion.EMPTY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +39,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TransactionListViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
+    private val getTransactionUseCase: GetTransactionUseCase,
     private val getTransactionStatsUseCase: GetTransactionStatsUseCase,
     private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val dispatchers: CoroutineDispatchers
@@ -38,26 +51,24 @@ class TransactionListViewModel @Inject constructor(
     private val _sideEffect = Channel<TransactionListSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
 
+    private var transactionToBeDeleted: TransactionUiModel = EMPTY
+
     init {
         loadTransactionsAndStats()
     }
 
     fun onEvent(event: TransactionListEvent) {
         when (event) {
-            TransactionListEvent.Refresh -> loadTransactionsAndStats()
-            is TransactionListEvent.OnTransactionClick -> {
-                viewModelScope.launch(dispatchers.main) {
-                    _sideEffect.send(TransactionListSideEffect.NavigateToTransactionDetails(event.transactionId))
-                }
+            is Refresh -> loadTransactionsAndStats()
+            is SoftDeleteTransaction -> loadTransaction(event.transactionId)
+            is HardDeleteTransaction -> deleteTransaction(transactionToBeDeleted)
+            is UndoDelete -> undoDelete()
+            is OnTransactionClick -> viewModelScope.launch(dispatchers.main) {
+                _sideEffect.send(NavigateToTransactionDetails(event.transactionId))
             }
-
-            TransactionListEvent.OnAddTransactionClick -> {
-                viewModelScope.launch(dispatchers.main) {
-                    _sideEffect.send(TransactionListSideEffect.NavigateToAddTransaction)
-                }
+            is OnAddTransactionClick -> viewModelScope.launch(dispatchers.main) {
+                _sideEffect.send(NavigateToAddTransaction)
             }
-
-            is TransactionListEvent.DeleteTransaction -> deleteTransaction(event.transactionId)
         }
     }
 
@@ -74,7 +85,7 @@ class TransactionListViewModel @Inject constructor(
             }.time
 
             combine(
-                getTransactionsUseCase(parameters = Params.All),
+                getTransactionsUseCase(parameters = GetTransactionsUseCase.Params.All),
                 getTransactionStatsUseCase(
                     GetTransactionStatsUseCase.Params(
                         startDate = startOfMonth,
@@ -83,20 +94,6 @@ class TransactionListViewModel @Inject constructor(
                 )
             ) { transactionsResult, statsResult ->
                 when {
-                    transactionsResult is Result.Error -> {
-                        TransactionListState.Error(
-                            message = transactionsResult.exception.message
-                                ?: "Failed to load transactions"
-                        )
-                    }
-
-                    statsResult is Result.Error -> {
-                        TransactionListState.Error(
-                            message = statsResult.exception.message
-                                ?: "Failed to load transaction stats"
-                        )
-                    }
-
                     transactionsResult is Result.Success && statsResult is Result.Success -> {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault())
                         TransactionListState.Success(
@@ -106,7 +103,14 @@ class TransactionListViewModel @Inject constructor(
                             balance = currencyFormatter.format(statsResult.data.balance)
                         )
                     }
-
+                    statsResult is Result.Error -> TransactionListState.Error(
+                        message = statsResult.exception.message
+                            ?: "Failed to load transaction stats"
+                    )
+                    transactionsResult is Result.Error -> TransactionListState.Error(
+                        message = transactionsResult.exception.message
+                            ?: "Failed to load transactions"
+                    )
                     else -> TransactionListState.Loading
                 }
             }.collectLatest { state ->
@@ -115,28 +119,63 @@ class TransactionListViewModel @Inject constructor(
         }
     }
 
-    private fun deleteTransaction(transactionId: String) {
+    private fun deleteTransaction(transaction: TransactionUiModel) {
         viewModelScope.launch(dispatchers.io) {
-            val result =
-                deleteTransactionUseCase(parameters = DeleteTransactionUseCase.Params(transactionId))
-            when (result) {
+            when (val result = deleteTransactionUseCase(parameters = DeleteTransactionUseCase.Params(transaction.id))) {
+                is Result.Loading -> _state.value = TransactionListState.Loading
                 is Result.Success -> {
                     loadTransactionsAndStats()
                     _sideEffect.send(
-                        TransactionListSideEffect.ShowSnackbar("Transaction deleted successfully")
-                    )
-                }
-
-                is Result.Error -> {
-                    _sideEffect.send(
-                        TransactionListSideEffect.ShowSnackbar(
-                            result.exception.message ?: "Failed to delete transaction"
+                        ShowUndoSnackbar(
+                            transactionId = null,
+                            message = "Transaction deleted successfully",
                         )
                     )
-                    loadTransactionsAndStats() // Reload to ensure UI is in sync
                 }
+                is Result.Error -> {
+                    loadTransactionsAndStats()
+                    _sideEffect.send(
+                        ShowUndoSnackbar(
+                            transactionId = null,
+                            message = result.exception.message ?: "Failed to delete transaction"
+                        )
+                    )
+                }
+            }
+        }
+    }
 
+    private fun loadTransaction(transactionId: String) {
+        viewModelScope.launch(dispatchers.io) {
+            when (val result = getTransactionUseCase(GetTransactionUseCase.Params(transactionId))) {
                 is Result.Loading -> _state.value = TransactionListState.Loading
+                is Result.Success<Transaction> -> {
+                    transactionToBeDeleted = result.data.toUiModel()
+                    _sideEffect.send(
+                        ShowUndoSnackbar(
+                            transactionId = transactionToBeDeleted.id,
+                            message = "Transaction is being deleted",
+                        )
+                    )
+                }
+                is Result.Error -> _state.value = TransactionListState.Error(
+                    message = result.exception.message ?: "Failed to load transaction"
+                )
+            }
+        }
+    }
+
+    private fun undoDelete() {
+        viewModelScope.launch(dispatchers.io) {
+            if (transactionToBeDeleted != EMPTY) {
+                loadTransactionsAndStats()
+                _sideEffect.send(
+                    ShowUndoSnackbar(
+                        transactionId = null,
+                        message = "Transaction restored"
+                    )
+                )
+                transactionToBeDeleted = EMPTY
             }
         }
     }
