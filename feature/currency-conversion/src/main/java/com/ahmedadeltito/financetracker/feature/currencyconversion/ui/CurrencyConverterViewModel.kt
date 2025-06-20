@@ -9,8 +9,10 @@ import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.usecas
 import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.usecase.ExchangeRatesProvidersUseCase
 import com.ahmedadeltito.financetracker.feature.currencyconversion.ui.CurrencyConverterState.Input
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -24,6 +26,9 @@ class CurrencyConverterViewModel @Inject constructor(
 
     private val _state = MutableStateFlow<CurrencyConverterState>(CurrencyConverterState.Loading)
     val state: StateFlow<CurrencyConverterState> = _state
+
+    private val _sideEffect = Channel<CurrencyConverterSideEffect>()
+    val sideEffect = _sideEffect.receiveAsFlow()
 
     init {
         getExchangeRatesProviders()
@@ -59,7 +64,13 @@ class CurrencyConverterViewModel @Inject constructor(
             is CurrencyConverterEvent.OnProviderChange ->
                 _state.value = currentInput().copy(selectedProviderId = event.providerId)
             is CurrencyConverterEvent.OnConvertClick -> convert()
+            is CurrencyConverterEvent.OnBackClick ->
+                sendSideEffect(CurrencyConverterSideEffect.NavigateBack)
         }
+    }
+
+    private fun sendSideEffect(sideEffect: CurrencyConverterSideEffect){
+        viewModelScope.launch(dispatchers.io) { _sideEffect.send(sideEffect) }
     }
 
     private fun currentInput(): Input = _state.value as Input
@@ -90,25 +101,4 @@ class CurrencyConverterViewModel @Inject constructor(
             }
         }
     }
-}
-
-sealed interface CurrencyConverterEvent {
-    data class OnAmountChange(val amount: String) : CurrencyConverterEvent
-    data class OnFromCurrencyChange(val currencyCode: String) : CurrencyConverterEvent
-    data class OnToCurrencyChange(val currencyCode: String) : CurrencyConverterEvent
-    data class OnProviderChange(val providerId: String) : CurrencyConverterEvent
-    object OnConvertClick : CurrencyConverterEvent
-}
-
-sealed interface CurrencyConverterState {
-    data class Input(
-        val amount: String = "",
-        val fromCode: String? = null,
-        val toCode: String? = null,
-        val providerOptions: List<Pair<String, String>> = emptyList(),
-        val selectedProviderId: String? = null,
-    ) : CurrencyConverterState
-    object Loading : CurrencyConverterState
-    data class Result(val result: String) : CurrencyConverterState
-    data class Error(val message: String) : CurrencyConverterState
 }

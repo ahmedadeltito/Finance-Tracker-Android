@@ -107,7 +107,7 @@ fun NavGraphBuilder.addTransactionScreen(
             viewModel.sideEffect.collectLatest { effect ->
                 when (effect) {
                     is AddTransactionSideEffect.NavigateBack -> onNavigateBack()
-                    is AddTransactionSideEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
+                    is AddTransactionSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
@@ -142,7 +142,7 @@ fun NavGraphBuilder.updateTransactionScreen(
             viewModel.sideEffect.collectLatest { effect ->
                 when (effect) {
                     is UpdateTransactionSideEffect.NavigateBack -> onNavigateBack()
-                    is UpdateTransactionSideEffect.ShowSuccess -> snackbarHostState.showSnackbar(effect.message)
+                    is UpdateTransactionSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }

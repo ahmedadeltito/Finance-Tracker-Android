@@ -33,5 +33,5 @@ sealed interface UpdateTransactionEvent {
 
 sealed interface UpdateTransactionSideEffect {
     data object NavigateBack : UpdateTransactionSideEffect
-    data class ShowSuccess(val message: String) : UpdateTransactionSideEffect
+    data class ShowSnackbar(val message: String) : UpdateTransactionSideEffect
 }

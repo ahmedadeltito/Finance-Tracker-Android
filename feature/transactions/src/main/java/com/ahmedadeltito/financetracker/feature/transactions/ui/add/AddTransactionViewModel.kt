@@ -103,7 +103,7 @@ class AddTransactionViewModel @Inject constructor(
                 addTransactionUseCase(AddTransactionUseCase.Params(transaction))
             when (addTransaction) {
                 is Result.Success -> {
-                    _sideEffect.send(AddTransactionSideEffect.ShowSuccess("Transaction added successfully"))
+                    _sideEffect.send(AddTransactionSideEffect.ShowSnackbar("Transaction added successfully"))
                     _sideEffect.send(AddTransactionSideEffect.NavigateBack)
                 }
                 is Result.Error -> _state.value = AddTransactionState.Error(

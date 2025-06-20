@@ -126,7 +126,7 @@ class UpdateTransactionViewModel @Inject constructor(
                 updateTransactionUseCase(UpdateTransactionUseCase.Params(transaction))
             when (updateTransaction) {
                 is Result.Success -> {
-                    _sideEffect.send(UpdateTransactionSideEffect.ShowSuccess("Transaction updated successfully"))
+                    _sideEffect.send(UpdateTransactionSideEffect.ShowSnackbar("Transaction updated successfully"))
                     _sideEffect.send(UpdateTransactionSideEffect.NavigateBack)
                 }
                 is Result.Error -> _state.value = UpdateTransactionState.Error(

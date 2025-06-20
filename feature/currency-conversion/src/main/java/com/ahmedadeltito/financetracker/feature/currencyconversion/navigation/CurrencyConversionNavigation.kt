@@ -12,10 +12,10 @@ fun NavController.navigateToCurrencyConverter() {
 }
 
 fun NavGraphBuilder.currencyConverterScreen(
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit
 ) {
     composable(route = currencyConverterRoute) {
-        CurrencyConverterRoute()
+        CurrencyConverterRoute(onNavigateBack)
     }
 }
 
