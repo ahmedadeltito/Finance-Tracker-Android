@@ -22,40 +22,40 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnAddTransactionClick
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnTransactionClick
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.Refresh
+import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.SoftDeleteTransaction
+import com.ahmedadeltito.financetracker.ui.components.DeleteConfirmationDialog
+import com.ahmedadeltito.financetracker.ui.components.ErrorComponent
 import com.ahmedadeltito.financetracker.ui.components.TransactionCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionListScreen(
-    viewModel: TransactionListViewModel = hiltViewModel(),
-    onNavigateToTransactionDetails: (String) -> Unit,
-    onNavigateToAddTransaction: () -> Unit
+    snackbarHostState: SnackbarHostState,
+    uiState: TransactionListState,
+    onEvent: (TransactionListEvent) -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    var swipedTransactionId by rememberSaveable { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(key1 = true) {
-        viewModel.sideEffect.collect { effect ->
-            when (effect) {
-                is TransactionListSideEffect.NavigateToTransactionDetails -> {
-                    onNavigateToTransactionDetails(effect.transactionId)
-                }
-                TransactionListSideEffect.NavigateToAddTransaction -> {
-                    onNavigateToAddTransaction()
-                }
-                is TransactionListSideEffect.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(effect.message)
-                }
+    swipedTransactionId?.let { transactionId ->
+        DeleteConfirmationDialog(
+            onConfirm = {
+                onEvent(SoftDeleteTransaction(transactionId))
+                swipedTransactionId = null
+            },
+            onDismiss = {
+                swipedTransactionId = null
             }
-        }
+        )
     }
 
     Scaffold(
@@ -66,7 +66,7 @@ fun TransactionListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.onEvent(TransactionListEvent.OnAddTransactionClick) }
+                onClick = { onEvent(OnAddTransactionClick) }
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Transaction")
             }
@@ -78,14 +78,12 @@ fun TransactionListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (state) {
-                is TransactionListState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+            when (uiState) {
+                is TransactionListState.Loading -> CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
                 is TransactionListState.Success -> {
-                    val transactions = (state as TransactionListState.Success).transactions
+                    val transactions = uiState.transactions
                     if (transactions.isEmpty()) {
                         Text(
                             text = "No transactions yet",
@@ -104,15 +102,13 @@ fun TransactionListScreen(
                                     confirmValueChange = { dismissValue ->
                                         when (dismissValue) {
                                             SwipeToDismissBoxValue.EndToStart -> {
-                                                viewModel.onEvent(TransactionListEvent.DeleteTransaction(transaction.id))
-                                                true
+                                                swipedTransactionId = transaction.id
+                                                false
                                             }
-                                            SwipeToDismissBoxValue.StartToEnd -> false
                                             else -> false
                                         }
                                     }
                                 )
-
                                 SwipeToDismissBox(
                                     state = dismissState,
                                     enableDismissFromStartToEnd = false,
@@ -134,27 +130,22 @@ fun TransactionListScreen(
                                 ) {
                                     TransactionCard(
                                         transaction = transaction,
-                                        onClick = {
-                                            viewModel.onEvent(
-                                                TransactionListEvent.OnTransactionClick(transaction.id)
-                                            )
-                                        },
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                        onClick = { onEvent(OnTransactionClick(transaction.id)) },
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 8.dp
+                                        )
                                     )
                                 }
                             }
                         }
                     }
                 }
-                is TransactionListState.Error -> {
-                    Text(
-                        text = (state as TransactionListState.Error).message,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(horizontal = 16.dp)
-                    )
-                }
+                is TransactionListState.Error -> ErrorComponent(
+                    paddingValues = paddingValues,
+                    errorMessage = uiState.message,
+                    onClick = { onEvent(Refresh) }
+                )
             }
         }
     }
