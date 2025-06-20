@@ -9,20 +9,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed class TransactionTypeUiModel(
     val displayText: String,
     val color: Color,
-    val amountPrefix: String,
     val icon: ImageVector
 ) {
     data object Income : TransactionTypeUiModel(
         displayText = "Income",
         color = com.ahmedadeltito.financetracker.ui.theme.Income,
-        amountPrefix = "+",
         icon = Icons.AutoMirrored.Filled.ArrowForward
     )
 
     data object Expense : TransactionTypeUiModel(
         displayText = "Expense",
         color = com.ahmedadeltito.financetracker.ui.theme.Expense,
-        amountPrefix = "-",
         icon = Icons.AutoMirrored.Filled.ArrowBack
     )
 } 

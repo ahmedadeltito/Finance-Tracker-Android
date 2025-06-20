@@ -7,6 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.ahmedadeltito.financetracker.feature.currencyconversion.navigation.currencyConverterScreen
+import com.ahmedadeltito.financetracker.feature.currencyconversion.navigation.navigateToCurrencyConverter
 import com.ahmedadeltito.financetracker.feature.transactions.navigation.addTransactionScreen
 import com.ahmedadeltito.financetracker.feature.transactions.navigation.navigateToAddTransaction
 import com.ahmedadeltito.financetracker.feature.transactions.navigation.navigateToEditTransaction
@@ -36,12 +38,16 @@ fun FinanceTrackerApp() {
         ) {
             transactionsScreen(
                 onNavigateToAddTransaction = { navController.navigateToAddTransaction() },
-                onNavigateToEditTransaction = { navController.navigateToEditTransaction(it) }
+                onNavigateToEditTransaction = { navController.navigateToEditTransaction(it) },
+                onNavigateToCurrencyConverter = { navController.navigateToCurrencyConverter() }
             )
             addTransactionScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
             updateTransactionScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+            currencyConverterScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

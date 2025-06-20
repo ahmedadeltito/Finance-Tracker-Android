@@ -41,6 +41,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":domain"))
+    implementation(project(":feature:currency-conversion"))
 
     // AndroidX
     implementation(libs.androidx.core.ktx)
@@ -66,6 +67,12 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+
+    // Retrofit + OkHttp
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.core)
+    implementation(libs.okhttp.logging)
 
     // Testing
     testImplementation(libs.junit)

@@ -57,12 +57,6 @@ data class TransactionCategory(
             type = TransactionType.INCOME,
             color = "#FFB300" // Amber
         )
-        val OTHER_INCOME = TransactionCategory(
-            id = "income_other",
-            name = "Other",
-            type = TransactionType.INCOME,
-            color = "#757575" // Grey
-        )
 
         // Predefined categories for expenses
         val GROCERIES = TransactionCategory(
@@ -107,10 +101,10 @@ data class TransactionCategory(
             type = TransactionType.EXPENSE,
             color = "#43A047" // Green
         )
-        val OTHER_EXPENSE = TransactionCategory(
-            id = "expense_other",
+        val OTHER = TransactionCategory(
+            id = "other",
             name = "Other",
-            type = TransactionType.EXPENSE,
+            type = TransactionType.INCOME,
             color = "#757575" // Grey
         )
 
@@ -119,15 +113,14 @@ data class TransactionCategory(
             SALARY,
             INVESTMENT,
             BONUS,
-            OTHER_INCOME,
+            OTHER,
             GROCERIES,
             BILLS,
             ENTERTAINMENT,
             TRAVEL,
             SHOPPING,
             HEALTH,
-            TRANSPORT,
-            OTHER_EXPENSE
+            TRANSPORT
         )
     }
 } 

@@ -67,7 +67,7 @@ object PreviewData {
     val sampleTransactions = listOf(
         TransactionUiModel(
             id = "1",
-            amount = "+$1,500.00",
+            amount = "1,500.00",
             formattedDate = "Jan 15, 2024",
             category = sampleCategories[0], // Salary
             note = "Monthly salary",
@@ -75,7 +75,7 @@ object PreviewData {
         ),
         TransactionUiModel(
             id = "2",
-            amount = "-$50.00",
+            amount = "50.00",
             formattedDate = "Jan 15, 2024",
             category = sampleCategories[2], // Groceries
             note = "Weekly groceries",
@@ -83,7 +83,7 @@ object PreviewData {
         ),
         TransactionUiModel(
             id = "3",
-            amount = "-$100.00",
+            amount = "100.00",
             formattedDate = "Jan 14, 2024",
             category = sampleCategories[3], // Bills
             note = "Electricity bill",
@@ -91,7 +91,7 @@ object PreviewData {
         ),
         TransactionUiModel(
             id = "4",
-            amount = "+$500.00",
+            amount = "500.00",
             formattedDate = "Jan 13, 2024",
             category = sampleCategories[1], // Investment
             note = "Stock dividends",

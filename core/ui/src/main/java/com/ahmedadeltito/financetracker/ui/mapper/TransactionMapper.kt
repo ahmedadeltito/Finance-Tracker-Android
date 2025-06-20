@@ -22,7 +22,7 @@ object TransactionMapper {
         val transactionType = TransactionTypeMapper.run { type.toUiModel() }
         return TransactionUiModel(
             id = id,
-            amount = formatAmount(amount, transactionType),
+            amount = formatAmount(amount),
             formattedDate = formatDate(date),
             category = category.toUiModel(),
             note = notes.orEmpty(),
@@ -56,13 +56,13 @@ object TransactionMapper {
         )
     }
 
-    private fun formatAmount(amount: BigDecimal, type: TransactionTypeUiModel): String {
-        val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
+    private fun formatAmount(amount: BigDecimal): String {
+        val currencyFormatter = NumberFormat.getInstance(Locale.getDefault()).apply {
             maximumFractionDigits = 2
             minimumFractionDigits = 2
         }
         return currencyFormatter.format(amount.abs()).let { formattedAmount ->
-            "${type.amountPrefix}$formattedAmount"
+            "$formattedAmount"
         }
     }
 

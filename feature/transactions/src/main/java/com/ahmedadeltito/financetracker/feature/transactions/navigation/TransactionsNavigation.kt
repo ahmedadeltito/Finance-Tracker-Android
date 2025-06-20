@@ -40,7 +40,8 @@ fun NavController.navigateToEditTransaction(transactionId: String) {
 
 fun NavGraphBuilder.transactionsScreen(
     onNavigateToAddTransaction: () -> Unit,
-    onNavigateToEditTransaction: (String) -> Unit
+    onNavigateToEditTransaction: (String) -> Unit,
+    onNavigateToCurrencyConverter: () -> Unit
 ) {
     composable(route = transactionsRoute) {
 
@@ -78,7 +79,8 @@ fun NavGraphBuilder.transactionsScreen(
         TransactionListScreen(
             snackbarHostState = snackbarHostState,
             uiState = uiState,
-            onEvent = viewModel::onEvent
+            onEvent = viewModel::onEvent,
+            onNavigateToCurrencyConverter = onNavigateToCurrencyConverter
         )
     }
 }

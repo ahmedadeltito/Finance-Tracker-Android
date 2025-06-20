@@ -132,7 +132,7 @@ private fun TransactionCardIncomePreview() {
         TransactionCard(
             transaction = TransactionUiModel(
                 id = "1",
-                amount = "+$1,500.00",
+                amount = "1,500.00",
                 formattedDate = "Jan 15, 2024",
                 category = TransactionCategoryUiModel(
                     id = "1",
@@ -157,7 +157,7 @@ private fun TransactionCardExpensePreview() {
         TransactionCard(
             transaction = TransactionUiModel(
                 id = "2",
-                amount = "-$50.00",
+                amount = "50.00",
                 formattedDate = "Jan 15, 2024",
                 category = TransactionCategoryUiModel(
                     id = "2",
@@ -183,7 +183,7 @@ private fun TransactionCardListPreview() {
             TransactionCard(
                 transaction = TransactionUiModel(
                     id = "1",
-                    amount = "+$1,500.00",
+                    amount = "1,500.00",
                     formattedDate = "Jan 15, 2024",
                     category = TransactionCategoryUiModel(
                         id = "1",
@@ -201,7 +201,7 @@ private fun TransactionCardListPreview() {
             TransactionCard(
                 transaction = TransactionUiModel(
                     id = "2",
-                    amount = "-$50.00",
+                    amount = "50.00",
                     formattedDate = "Jan 15, 2024",
                     category = TransactionCategoryUiModel(
                         id = "2",
