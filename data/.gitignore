@@ -1,0 +1,11 @@
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Keep schema files
+!/schemas/
+
+*.iml
+.DS_Store 

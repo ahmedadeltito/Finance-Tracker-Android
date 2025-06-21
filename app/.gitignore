@@ -1,1 +1,6 @@
 /build
+/release
+*.iml
+.DS_Store
+/captures
+google-services.json

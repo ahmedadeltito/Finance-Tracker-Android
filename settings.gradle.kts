@@ -11,6 +11,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+@Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -21,3 +22,13 @@ dependencyResolutionManagement {
 
 rootProject.name = "Finance Tracker"
 include(":app")
+include(":core")
+include(":core:common")
+include(":core:ui")
+include(":core:navigation")
+include(":core:testing")
+include(":data")
+include(":domain")
+include(":feature")
+include(":feature:transactions")
+include(":currency-conversion")
