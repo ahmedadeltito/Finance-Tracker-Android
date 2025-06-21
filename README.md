@@ -11,6 +11,7 @@ The project is built upon a foundation of modern Android development best practi
 -   **100% Kotlin & Jetpack Compose**: The entire application is written in Kotlin. The UI is built declaratively using Jetpack Compose.
 -   **MVVM & Unidirectional Data Flow (UDF)**: The presentation layer uses the Model-View-ViewModel pattern, where each screen follows a strict UDF contract (`State`, `Event`, `Effect`) for predictable state management.
 -   **Dependency Injection with Hilt**: Hilt is used to manage dependencies across the entire application, making the code more decoupled and testable.
+-   **Hexagonal (Plugin) Architecture**: Leverages a Ports & Adapters pattern to decouple business logic from external services (e.g., different API providers), creating a highly flexible and testable plugin system.
 
 ## Screenshots
 
