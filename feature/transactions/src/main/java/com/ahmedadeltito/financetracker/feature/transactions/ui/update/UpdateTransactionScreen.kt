@@ -19,7 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.ahmedadeltito.financetracker.ui.components.TransactionFormContent
-import com.ahmedadeltito.financetracker.ui.model.ValidationState
+import com.ahmedadeltito.financetracker.ui.model.TransactionFormValidationState
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionEvent.OnAmountChange
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionEvent.OnBackClick
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionEvent.OnCategorySelect
@@ -27,9 +27,9 @@ import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTra
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionEvent.OnDescriptionChange
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionEvent.OnTypeChange
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionEvent.OnUpdateClick
-import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionState.Error
-import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionState.Loading
-import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionState.Success
+import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionUiState.Error
+import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionUiState.Loading
+import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionUiState.Success
 import com.ahmedadeltito.financetracker.ui.components.ErrorComponent
 import com.ahmedadeltito.financetracker.ui.components.LightAndDarkPreview
 import com.ahmedadeltito.financetracker.ui.components.LoadingComponent
@@ -40,7 +40,7 @@ import com.ahmedadeltito.financetracker.ui.theme.FinanceTrackerTheme
 @Composable
 fun UpdateTransactionScreen(
     snackbarHostState: SnackbarHostState,
-    uiState: UpdateTransactionState,
+    uiState: UpdateTransactionUiState,
     onEvent: (UpdateTransactionEvent) -> Unit,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -108,7 +108,7 @@ private fun UpdateTransactionScreenSuccessPreview() {
             uiState = Success(
                 transaction = PreviewData.sampleTransactions[0],
                 categories = PreviewData.sampleCategories,
-                validation = ValidationState()
+                validation = TransactionFormValidationState()
             ),
             onEvent = {}
         )
@@ -138,7 +138,7 @@ private fun UpdateTransactionScreenValidationErrorPreview() {
             uiState = Success(
                 transaction = PreviewData.sampleTransactions[0],
                 categories = PreviewData.sampleCategories,
-                validation = ValidationState(
+                validation = TransactionFormValidationState(
                     amountError = "Amount is required",
                     descriptionError = "Description is too long",
                     categoryError = "Please select a category",

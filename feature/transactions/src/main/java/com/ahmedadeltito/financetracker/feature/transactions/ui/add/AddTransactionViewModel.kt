@@ -10,10 +10,10 @@ import com.ahmedadeltito.financetracker.domain.usecase.category.GetTransactionCa
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.AddTransactionUseCase
 import com.ahmedadeltito.financetracker.feature.transactions.common.BaseTransactionFormViewModel
 import com.ahmedadeltito.financetracker.feature.transactions.common.TransactionFormValidator
-import com.ahmedadeltito.financetracker.ui.model.ValidationState
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.fromFormData
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.parseDateString
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.toUiModel
+import com.ahmedadeltito.financetracker.feature.transactions.mapper.TransactionFormMapper
+import com.ahmedadeltito.financetracker.feature.transactions.mapper.toUiModel
+import com.ahmedadeltito.financetracker.ui.mapper.DateMapper
+import com.ahmedadeltito.financetracker.ui.model.TransactionFormValidationState
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -30,15 +30,15 @@ class AddTransactionViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val getTransactionCategoriesUseCase: GetTransactionCategoriesUseCase,
     override val dispatchers: CoroutineDispatchers,
-) : BaseTransactionFormViewModel<AddTransactionState, AddTransactionState.Success>(
+) : BaseTransactionFormViewModel<AddTransactionUiState, AddTransactionUiState.Success>(
     dispatchers = dispatchers,
-    initialState = AddTransactionState.Loading
+    initialState = AddTransactionUiState.Loading
 ) {
 
     private val _sideEffect = Channel<AddTransactionSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
 
-    val state: StateFlow<AddTransactionState> = baseState
+    val state: StateFlow<AddTransactionUiState> = baseState
 
     init {
         loadCategories(transactionUiModel = TransactionUiModel.EMPTY)
@@ -62,21 +62,21 @@ class AddTransactionViewModel @Inject constructor(
                 getTransactionCategoriesUseCase(NoParameters)
             getTransactionCategories.collectLatest { result ->
                 when (result) {
-                    is Result.Success -> _state.value = AddTransactionState.Success(
+                    is Result.Success -> _state.value = AddTransactionUiState.Success(
                         transaction = transactionUiModel,
                         categories = result.data.map { it.toUiModel() },
                     )
-                    is Result.Error -> _state.value = AddTransactionState.Error(
+                    is Result.Error -> _state.value = AddTransactionUiState.Error(
                         message = result.exception.message ?: "Failed to load categories"
                     )
-                    is Result.Loading -> _state.value = AddTransactionState.Loading
+                    is Result.Loading -> _state.value = AddTransactionUiState.Loading
                 }
             }
         }
     }
 
     private fun saveTransaction() {
-        val currentState = _state.value as? AddTransactionState.Success ?: return
+        val currentState = _state.value as? AddTransactionUiState.Success ?: return
 
         val formData = currentState.transaction
         val validation = TransactionFormValidator.validateForm(formData)
@@ -87,14 +87,14 @@ class AddTransactionViewModel @Inject constructor(
         }
 
         viewModelScope.launch(dispatchers.io) {
-            _state.value = AddTransactionState.Loading
+            _state.value = AddTransactionUiState.Loading
 
             val amount = formData.amount.toBigDecimalOrNull() ?: return@launch
-            val transaction = fromFormData(
+            val transaction = TransactionFormMapper.fromFormData(
                 id = UUID.randomUUID().toString(),
                 amount = amount,
                 description = formData.note ?: "",
-                date = parseDateString(formData.formattedDate),
+                date = DateMapper.parseDateString(formData.formattedDate),
                 type = formData.type,
                 categoryId = formData.category.id
             )
@@ -106,10 +106,10 @@ class AddTransactionViewModel @Inject constructor(
                     _sideEffect.send(AddTransactionSideEffect.ShowSnackbar("Transaction added successfully"))
                     _sideEffect.send(AddTransactionSideEffect.NavigateBack)
                 }
-                is Result.Error -> _state.value = AddTransactionState.Error(
+                is Result.Error -> _state.value = AddTransactionUiState.Error(
                     message = addTransaction.exception.message ?: "Failed to save transaction"
                 )
-                is Result.Loading -> _state.value = AddTransactionState.Loading
+                is Result.Loading -> _state.value = AddTransactionUiState.Loading
             }
         }
     }
@@ -121,8 +121,8 @@ class AddTransactionViewModel @Inject constructor(
     }
 
     override fun copySuccessState(
-        current: AddTransactionState.Success,
+        current: AddTransactionUiState.Success,
         transaction: TransactionUiModel,
-        validation: ValidationState
-    ): AddTransactionState.Success = current.copy(transaction = transaction, validation = validation)
+        validation: TransactionFormValidationState
+    ): AddTransactionUiState.Success = current.copy(transaction = transaction, validation = validation)
 } 

@@ -25,11 +25,11 @@ import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransacti
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionEvent.OnDescriptionChange
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionEvent.OnSaveClick
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionEvent.OnTypeChange
-import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionState.Error
-import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionState.Loading
-import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionState.Success
+import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionUiState.Error
+import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionUiState.Loading
+import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionUiState.Success
 import com.ahmedadeltito.financetracker.ui.components.TransactionFormContent
-import com.ahmedadeltito.financetracker.ui.model.ValidationState
+import com.ahmedadeltito.financetracker.ui.model.TransactionFormValidationState
 import com.ahmedadeltito.financetracker.ui.components.ErrorComponent
 import com.ahmedadeltito.financetracker.ui.components.LightAndDarkPreview
 import com.ahmedadeltito.financetracker.ui.components.LoadingComponent
@@ -40,7 +40,7 @@ import com.ahmedadeltito.financetracker.ui.theme.FinanceTrackerTheme
 @Composable
 fun AddTransactionScreen(
     snackbarHostState: SnackbarHostState,
-    uiState: AddTransactionState,
+    uiState: AddTransactionUiState,
     onEvent: (AddTransactionEvent) -> Unit
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
@@ -108,7 +108,7 @@ private fun AddTransactionScreenSuccessPreview() {
             uiState = Success(
                 transaction = PreviewData.sampleTransactions[0],
                 categories = PreviewData.sampleCategories,
-                validation = ValidationState()
+                validation = TransactionFormValidationState()
             ),
             onEvent = {}
         )
@@ -138,7 +138,7 @@ private fun AddTransactionScreenValidationErrorPreview() {
             uiState = Success(
                 transaction = PreviewData.sampleTransactions[0],
                 categories = PreviewData.sampleCategories,
-                validation = ValidationState(
+                validation = TransactionFormValidationState(
                     amountError = "Amount is required",
                     descriptionError = "Description is too long",
                     categoryError = "Please select a category",

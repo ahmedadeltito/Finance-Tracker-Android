@@ -35,22 +35,26 @@ import com.ahmedadeltito.financetracker.feature.transactions.ui.list.Transaction
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnTransactionClick
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.Refresh
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.SoftDeleteTransaction
-import com.ahmedadeltito.financetracker.ui.components.DeleteConfirmationDialog
 import com.ahmedadeltito.financetracker.ui.components.ErrorComponent
+import com.ahmedadeltito.financetracker.ui.components.TransactionAlertDialog
 import com.ahmedadeltito.financetracker.ui.components.TransactionCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionListScreen(
     snackbarHostState: SnackbarHostState,
-    uiState: TransactionListState,
+    uiState: TransactionListUiState,
     onEvent: (TransactionListEvent) -> Unit,
     onNavigateToCurrencyConverter: () -> Unit
 ) {
     var swipedTransactionId by rememberSaveable { mutableStateOf<String?>(null) }
 
     swipedTransactionId?.let { transactionId ->
-        DeleteConfirmationDialog(
+        TransactionAlertDialog(
+            title = "Delete Transaction",
+            message = "Are you sure you want to delete this transaction? This action cannot be undone.",
+            confirmButtonText = "Delete",
+            dismissButtonText = "Cancel",
             onConfirm = {
                 onEvent(SoftDeleteTransaction(transactionId))
                 swipedTransactionId = null
@@ -90,10 +94,11 @@ fun TransactionListScreen(
                 .padding(paddingValues)
         ) {
             when (uiState) {
-                is TransactionListState.Loading -> CircularProgressIndicator(
+                is TransactionListUiState.Loading -> CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
-                is TransactionListState.Success -> {
+
+                is TransactionListUiState.Success -> {
                     val transactions = uiState.transactions
                     if (transactions.isEmpty()) {
                         Text(
@@ -116,6 +121,7 @@ fun TransactionListScreen(
                                                 swipedTransactionId = transaction.id
                                                 false
                                             }
+
                                             else -> false
                                         }
                                     }
@@ -152,7 +158,8 @@ fun TransactionListScreen(
                         }
                     }
                 }
-                is TransactionListState.Error -> ErrorComponent(
+
+                is TransactionListUiState.Error -> ErrorComponent(
                     paddingValues = paddingValues,
                     errorMessage = uiState.message,
                     onClick = { onEvent(Refresh) }

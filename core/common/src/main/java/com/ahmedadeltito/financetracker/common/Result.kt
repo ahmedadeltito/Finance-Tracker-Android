@@ -19,24 +19,3 @@ inline fun <T, R> Result<T>.map(transform: (T) -> R): Result<R> {
         is Result.Loading -> Result.loading()
     }
 }
-
-inline fun <T> Result<T>.onSuccess(action: (T) -> Unit): Result<T> {
-    if (this is Result.Success) {
-        action(data)
-    }
-    return this
-}
-
-inline fun <T> Result<T>.onError(action: (Throwable) -> Unit): Result<T> {
-    if (this is Result.Error) {
-        action(exception)
-    }
-    return this
-}
-
-inline fun <T> Result<T>.onLoading(action: () -> Unit): Result<T> {
-    if (this is Result.Loading) {
-        action()
-    }
-    return this
-} 

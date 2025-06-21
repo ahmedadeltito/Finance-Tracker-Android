@@ -13,6 +13,10 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.TransactionsNavigation.ADD_TRANSACTION_ROUTE
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.TransactionsNavigation.TRANSACTION_ID_ARG
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.TransactionsNavigation.TRANSACTION_ROUTE
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.TransactionsNavigation.UPDATE_TRANSACTION_ROUTE
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionScreen
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionSideEffect
 import com.ahmedadeltito.financetracker.feature.transactions.ui.add.AddTransactionViewModel
@@ -25,17 +29,19 @@ import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTra
 import com.ahmedadeltito.financetracker.feature.transactions.ui.update.UpdateTransactionViewModel
 import kotlinx.coroutines.flow.collectLatest
 
-private const val transactionsRoute = "transactions_route"
-private const val addTransactionRoute = "add_transaction_route"
-private const val updateTransactionRoute = "update_transaction_route"
-const val transactionIdArg = "transactionId"
+object TransactionsNavigation {
+    const val TRANSACTION_ROUTE = "transactions_route"
+    internal const val ADD_TRANSACTION_ROUTE = "add_transaction_route"
+    internal const val UPDATE_TRANSACTION_ROUTE = "update_transaction_route"
+    const val TRANSACTION_ID_ARG = "transactionId"
+}
 
 fun NavController.navigateToAddTransaction() {
-    this.navigate(addTransactionRoute)
+    this.navigate(ADD_TRANSACTION_ROUTE)
 }
 
 fun NavController.navigateToEditTransaction(transactionId: String) {
-    this.navigate("$updateTransactionRoute?$transactionIdArg=$transactionId")
+    this.navigate("$UPDATE_TRANSACTION_ROUTE?$TRANSACTION_ID_ARG=$transactionId")
 }
 
 fun NavGraphBuilder.transactionsScreen(
@@ -43,7 +49,7 @@ fun NavGraphBuilder.transactionsScreen(
     onNavigateToEditTransaction: (String) -> Unit,
     onNavigateToCurrencyConverter: () -> Unit
 ) {
-    composable(route = transactionsRoute) {
+    composable(route = TRANSACTION_ROUTE) {
 
         val snackbarHostState = remember { SnackbarHostState() }
 
@@ -88,16 +94,7 @@ fun NavGraphBuilder.transactionsScreen(
 fun NavGraphBuilder.addTransactionScreen(
     onNavigateBack: () -> Unit
 ) {
-    composable(
-        route = addTransactionRoute,
-        arguments = listOf(
-            navArgument(transactionIdArg) {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            }
-        )
-    ) {
+    composable(route = ADD_TRANSACTION_ROUTE) {
         val snackbarHostState = remember { SnackbarHostState() }
 
         val viewModel: AddTransactionViewModel = hiltViewModel()
@@ -124,9 +121,9 @@ fun NavGraphBuilder.updateTransactionScreen(
     onNavigateBack: () -> Unit
 ) {
     composable(
-        route = "$updateTransactionRoute?$transactionIdArg={$transactionIdArg}",
+        route = "$UPDATE_TRANSACTION_ROUTE?$TRANSACTION_ID_ARG={$TRANSACTION_ID_ARG}",
         arguments = listOf(
-            navArgument(transactionIdArg) {
+            navArgument(TRANSACTION_ID_ARG) {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null

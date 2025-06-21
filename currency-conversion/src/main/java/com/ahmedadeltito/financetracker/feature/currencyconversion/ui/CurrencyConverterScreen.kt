@@ -8,25 +8,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +38,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ahmedadeltito.financetracker.feature.currencyconversion.ui.CurrencyConverterEvent.OnBackClick
 import com.ahmedadeltito.financetracker.ui.components.PrimaryButton
+import com.ahmedadeltito.financetracker.ui.components.TransactionAlertDialog
+import com.ahmedadeltito.financetracker.ui.components.TransactionTextFieldComponent
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -46,11 +51,23 @@ fun CurrencyConverterRoute(
     val viewModel: CurrencyConverterViewModel = hiltViewModel()
     val uiState by viewModel.state.collectAsStateWithLifecycle()
 
+    var conversionResult by rememberSaveable { mutableStateOf<String?>(null) }
+    conversionResult?.let { conversionMessage ->
+        TransactionAlertDialog(
+            title = "Currency Conversion Result",
+            message = conversionMessage,
+            confirmButtonText = "OK",
+            onConfirm = { conversionResult = null },
+            onDismiss = { conversionResult = null }
+        )
+    }
+
     LaunchedEffect(key1 = true) {
         viewModel.sideEffect.collectLatest { effect ->
             when (effect) {
                 is CurrencyConverterSideEffect.NavigateBack -> onNavigateBack()
                 is CurrencyConverterSideEffect.ShowSnackbar -> snackbarHostState.showSnackbar(effect.message)
+                is CurrencyConverterSideEffect.ShowConversionResultDialog -> conversionResult = effect.conversionResult
             }
         }
     }
@@ -66,7 +83,7 @@ fun CurrencyConverterRoute(
 @Composable
 fun CurrencyConverterScreen(
     snackbarHostState: SnackbarHostState,
-    uiState: CurrencyConverterState,
+    uiState: CurrencyConverterUiState,
     onEvent: (CurrencyConverterEvent) -> Unit
 ) {
     Scaffold(
@@ -91,70 +108,69 @@ fun CurrencyConverterScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             when (uiState) {
-                is CurrencyConverterState.Loading -> CircularProgressIndicator()
-                is CurrencyConverterState.Input -> {
-                    OutlinedTextField(
+                is CurrencyConverterUiState.Loading -> CircularProgressIndicator()
+                is CurrencyConverterUiState.Form -> {
+                    TransactionTextFieldComponent(
                         value = uiState.amount,
+                        label = "Amount",
+                        supportingText = uiState.validation.amountError,
                         onValueChange = { onEvent(CurrencyConverterEvent.OnAmountChange(it)) },
-                        label = { Text("Amount") },
-                        modifier = Modifier.fillMaxWidth()
                     )
-                    OutlinedTextField(
+                    TransactionTextFieldComponent(
                         value = uiState.fromCode ?: "",
-                        onValueChange = { onEvent(CurrencyConverterEvent.OnFromCurrencyChange(currencyCode = it)) },
-                        label = { Text("From Currency (e.g. USD)") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = "From Code (e.g. USD)",
+                        supportingText = uiState.validation.fromCodeError,
+                        onValueChange = { onEvent(CurrencyConverterEvent.OnFromCurrencyChange(it.uppercase())) },
                     )
-                    OutlinedTextField(
+                    TransactionTextFieldComponent(
                         value = uiState.toCode ?: "",
-                        onValueChange = { onEvent(CurrencyConverterEvent.OnToCurrencyChange(currencyCode = it)) },
-                        label = { Text("To Currency (e.g. EUR)") },
-                        modifier = Modifier.fillMaxWidth()
+                        label = "To Code (e.g. EUR)",
+                        supportingText = uiState.validation.toCodeError,
+                        onValueChange = { onEvent(CurrencyConverterEvent.OnToCurrencyChange(it.uppercase())) },
                     )
 
-                    var dropdownMenuexpanded by remember { mutableStateOf(false) }
-                    OutlinedTextField(
-                        value = uiState.providerOptions.firstOrNull {
-                            it.first == uiState.selectedProviderId
-                        }?.second ?: "",
-                        onValueChange = { },
-                        readOnly = true,
-                        label = { Text("Rate Provider") },
-                        trailingIcon = {
-                            IconButton(onClick = { dropdownMenuexpanded = true }) {
-                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    DropdownMenu(
-                        expanded = dropdownMenuexpanded,
-                        onDismissRequest = { dropdownMenuexpanded = false }
+                    var expanded by remember { mutableStateOf(false) }
+                    val selectedLabel = uiState.providerOptions.firstOrNull { it.first == uiState.selectedProviderId }?.second ?: ""
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = !expanded }
                     ) {
-                        uiState.providerOptions.forEach { (id, label) ->
-                            DropdownMenuItem(
-                                text = { Text(label) },
-                                onClick = {
-                                    dropdownMenuexpanded = false
-                                    onEvent(CurrencyConverterEvent.OnProviderChange(id))
-                                }
-                            )
+                        TextField(
+                            value = selectedLabel,
+                            onValueChange = {},
+                            label = { Text("Rate Provider") },
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth()
+                        )
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            uiState.providerOptions.forEach { (id, label) ->
+                                DropdownMenuItem(
+                                    text = { Text(label) },
+                                    onClick = {
+                                        expanded = false
+                                        onEvent(CurrencyConverterEvent.OnProviderChange(id))
+                                    }
+                                )
+                            }
                         }
                     }
+                    uiState.validation.providerIdError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     PrimaryButton(onClick = { onEvent(CurrencyConverterEvent.OnConvertClick) }) {
                         Text("Convert")
                     }
                 }
-                is CurrencyConverterState.Result -> Text(
-                    text = "Result: ${uiState.result}",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-                is CurrencyConverterState.Error -> Text(
-                    text = uiState.message,
-                    color = MaterialTheme.colorScheme.error
-                )
             }
         }
     }

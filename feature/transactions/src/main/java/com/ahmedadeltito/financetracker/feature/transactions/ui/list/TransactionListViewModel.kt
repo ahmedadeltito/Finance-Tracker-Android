@@ -9,6 +9,7 @@ import com.ahmedadeltito.financetracker.domain.usecase.transaction.DeleteTransac
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionStatsUseCase
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionsUseCase
+import com.ahmedadeltito.financetracker.feature.transactions.mapper.toUiModel
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.HardDeleteTransaction
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnAddTransactionClick
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListEvent.OnTransactionClick
@@ -18,7 +19,6 @@ import com.ahmedadeltito.financetracker.feature.transactions.ui.list.Transaction
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect.NavigateToAddTransaction
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect.NavigateToTransactionDetails
 import com.ahmedadeltito.financetracker.feature.transactions.ui.list.TransactionListSideEffect.ShowUndoSnackbar
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.toUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel.Companion.EMPTY
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,8 +46,8 @@ class TransactionListViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow<TransactionListState>(TransactionListState.Loading)
-    val state: StateFlow<TransactionListState> = _state.asStateFlow()
+    private val _state = MutableStateFlow<TransactionListUiState>(TransactionListUiState.Loading)
+    val state: StateFlow<TransactionListUiState> = _state.asStateFlow()
 
     private val _sideEffect = Channel<TransactionListSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
@@ -100,22 +100,22 @@ class TransactionListViewModel @Inject constructor(
                 when {
                     transactionsResult is Result.Success && statsResult is Result.Success -> {
                         val currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault())
-                        TransactionListState.Success(
+                        TransactionListUiState.Success(
                             transactions = transactionsResult.data.map { it.toUiModel() },
                             totalIncome = currencyFormatter.format(statsResult.data.totalIncome),
                             totalExpense = currencyFormatter.format(statsResult.data.totalExpense),
                             balance = currencyFormatter.format(statsResult.data.balance)
                         )
                     }
-                    statsResult is Result.Error -> TransactionListState.Error(
+                    statsResult is Result.Error -> TransactionListUiState.Error(
                         message = statsResult.exception.message
                             ?: "Failed to load transaction stats"
                     )
-                    transactionsResult is Result.Error -> TransactionListState.Error(
+                    transactionsResult is Result.Error -> TransactionListUiState.Error(
                         message = transactionsResult.exception.message
                             ?: "Failed to load transactions"
                     )
-                    else -> TransactionListState.Loading
+                    else -> TransactionListUiState.Loading
                 }
             }.collectLatest { state ->
                 _state.value = state
@@ -128,7 +128,7 @@ class TransactionListViewModel @Inject constructor(
             val deleteTransaction: Result<Unit> =
                 deleteTransactionUseCase(DeleteTransactionUseCase.Params(transaction.id))
             when (deleteTransaction) {
-                is Result.Loading -> _state.value = TransactionListState.Loading
+                is Result.Loading -> _state.value = TransactionListUiState.Loading
                 is Result.Success -> {
                     loadTransactionsAndStats()
                     sendSideEffect(
@@ -156,11 +156,11 @@ class TransactionListViewModel @Inject constructor(
             val getTransaction: Result<Transaction> =
                 getTransactionUseCase(GetTransactionUseCase.Params(transactionId))
             when (getTransaction) {
-                is Result.Loading -> _state.value = TransactionListState.Loading
+                is Result.Loading -> _state.value = TransactionListUiState.Loading
                 is Result.Success -> {
                     transactionToBeDeleted = getTransaction.data.toUiModel().copy(isSoftDeleted = true)
 
-                    val currentState = _state.value as? TransactionListState.Success ?: return@launch
+                    val currentState = _state.value as? TransactionListUiState.Success ?: return@launch
                     _state.value = currentState.copy(
                         transactions = currentState.transactions.filterNot { it.id == transactionId }
                     )
@@ -172,7 +172,7 @@ class TransactionListViewModel @Inject constructor(
                         )
                     )
                 }
-                is Result.Error -> _state.value = TransactionListState.Error(
+                is Result.Error -> _state.value = TransactionListUiState.Error(
                     message = getTransaction.exception.message ?: "Failed to load transaction"
                 )
             }

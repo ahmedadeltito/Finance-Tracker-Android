@@ -2,8 +2,8 @@ package com.ahmedadeltito.financetracker.feature.transactions.common
 
 import androidx.lifecycle.ViewModel
 import com.ahmedadeltito.financetracker.common.di.CoroutineDispatchers
-import com.ahmedadeltito.financetracker.ui.model.ValidationState
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.formatDate
+import com.ahmedadeltito.financetracker.ui.mapper.DateMapper
+import com.ahmedadeltito.financetracker.ui.model.TransactionFormValidationState
 import com.ahmedadeltito.financetracker.ui.model.TransactionTypeUiModel
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +30,7 @@ abstract class BaseTransactionFormViewModel<State, Success : TransactionFormSucc
     protected abstract fun copySuccessState(
         current: Success,
         transaction: TransactionUiModel = current.transaction,
-        validation: ValidationState = current.validation
+        validation: TransactionFormValidationState = current.validation
     ): Success
 
     protected fun updateAmount(amount: String) {
@@ -61,7 +61,7 @@ abstract class BaseTransactionFormViewModel<State, Success : TransactionFormSucc
 
     protected fun updateDate(date: Date) {
         updateSuccessState { current ->
-            val formatted = formatDate(date)
+            val formatted = DateMapper.formatDate(date)
             val validation = current.validation.copy(
                 dateError = TransactionFormValidator.validateDate(formatted)
             )

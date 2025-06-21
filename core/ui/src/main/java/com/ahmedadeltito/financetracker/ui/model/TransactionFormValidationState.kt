@@ -1,6 +1,6 @@
 package com.ahmedadeltito.financetracker.ui.model
 
-data class ValidationState(
+data class TransactionFormValidationState(
     val amountError: String? = null,
     val descriptionError: String? = null,
     val categoryError: String? = null,

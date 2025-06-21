@@ -27,18 +27,18 @@ val OnSurface = Color(0xFF000000)
 val OnSurfaceDark = Color(0xFFFFFFFF)
 
 // Transaction type colors
-val Income = Color(0xFF4CAF50) // Green
-val Expense = Color(0xFFE53935) // Red
+val Income = Color(0xFF4CAF50)
+val Expense = Color(0xFFE53935)
 
 // Category colors
-val Salary = Color(0xFF1E88E5)      // Blue
-val Investment = Color(0xFF7CB342)   // Light Green
-val Bonus = Color(0xFFFFB300)       // Amber
-val Groceries = Color(0xFFE53935)    // Red
-val Bills = Color(0xFF5E35B1)       // Deep Purple
-val Entertainment = Color(0xFFFF7043) // Deep Orange
-val Travel = Color(0xFF039BE5)       // Light Blue
-val Shopping = Color(0xFFEC407A)     // Pink
-val Health = Color(0xFF00ACC1)       // Cyan
-val Transport = Color(0xFF43A047)    // Green
-val Other = Color(0xFF757575)        // Grey 
+val Salary = Color(0xFF1E88E5)
+val Investment = Color(0xFF7CB342)
+val Bonus = Color(0xFFFFB300)
+val Groceries = Color(0xFFE53935)
+val Bills = Color(0xFF5E35B1)
+val Entertainment = Color(0xFFFF7043)
+val Travel = Color(0xFF039BE5)
+val Shopping = Color(0xFFEC407A)
+val Health = Color(0xFF00ACC1)
+val Transport = Color(0xFF43A047)
+val Other = Color(0xFF757575)

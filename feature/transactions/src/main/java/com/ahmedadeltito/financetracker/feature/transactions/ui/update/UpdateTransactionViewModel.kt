@@ -11,13 +11,13 @@ import com.ahmedadeltito.financetracker.domain.usecase.category.GetTransactionCa
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionUseCase
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.GetTransactionUseCase.Params
 import com.ahmedadeltito.financetracker.domain.usecase.transaction.UpdateTransactionUseCase
-import com.ahmedadeltito.financetracker.feature.transactions.navigation.transactionIdArg
 import com.ahmedadeltito.financetracker.feature.transactions.common.BaseTransactionFormViewModel
 import com.ahmedadeltito.financetracker.feature.transactions.common.TransactionFormValidator
-import com.ahmedadeltito.financetracker.ui.model.ValidationState
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.fromFormData
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.parseDateString
-import com.ahmedadeltito.financetracker.ui.mapper.TransactionMapper.toUiModel
+import com.ahmedadeltito.financetracker.feature.transactions.mapper.TransactionFormMapper
+import com.ahmedadeltito.financetracker.feature.transactions.mapper.toUiModel
+import com.ahmedadeltito.financetracker.feature.transactions.navigation.TransactionsNavigation.TRANSACTION_ID_ARG
+import com.ahmedadeltito.financetracker.ui.mapper.DateMapper
+import com.ahmedadeltito.financetracker.ui.model.TransactionFormValidationState
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -35,17 +35,17 @@ class UpdateTransactionViewModel @Inject constructor(
     private val getTransactionCategoriesUseCase: GetTransactionCategoriesUseCase,
     override val dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle
-) : BaseTransactionFormViewModel<UpdateTransactionState, UpdateTransactionState.Success>(
+) : BaseTransactionFormViewModel<UpdateTransactionUiState, UpdateTransactionUiState.Success>(
     dispatchers = dispatchers,
-    initialState = UpdateTransactionState.Loading
+    initialState = UpdateTransactionUiState.Loading
 ) {
 
-    private val transactionId: String? = savedStateHandle[transactionIdArg]
+    private val transactionId: String? = savedStateHandle[TRANSACTION_ID_ARG]
 
     private val _sideEffect = Channel<UpdateTransactionSideEffect>()
     val sideEffect = _sideEffect.receiveAsFlow()
 
-    val state: StateFlow<UpdateTransactionState> = baseState
+    val state: StateFlow<UpdateTransactionUiState> = baseState
 
     init {
         if (transactionId != null) {
@@ -69,11 +69,11 @@ class UpdateTransactionViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             val getTransaction: Result<Transaction> = getTransactionUseCase(Params(transactionId))
             when (getTransaction) {
-                is Result.Loading -> _state.value = UpdateTransactionState.Loading
+                is Result.Loading -> _state.value = UpdateTransactionUiState.Loading
                 is Result.Success<Transaction> -> loadCategories(
                     transactionUiModel = getTransaction.data.toUiModel()
                 )
-                is Result.Error -> _state.value = UpdateTransactionState.Error(
+                is Result.Error -> _state.value = UpdateTransactionUiState.Error(
                     message = getTransaction.exception.message ?: "Failed to load transaction"
                 )
             }
@@ -86,12 +86,12 @@ class UpdateTransactionViewModel @Inject constructor(
                 getTransactionCategoriesUseCase(NoParameters)
             getTransactionCategories.collectLatest { result ->
                 when (result) {
-                    is Result.Loading -> _state.value = UpdateTransactionState.Loading
-                    is Result.Success -> _state.value = UpdateTransactionState.Success(
+                    is Result.Loading -> _state.value = UpdateTransactionUiState.Loading
+                    is Result.Success -> _state.value = UpdateTransactionUiState.Success(
                         transaction = transactionUiModel,
                         categories = result.data.map { it.toUiModel() },
                     )
-                    is Result.Error -> _state.value = UpdateTransactionState.Error(
+                    is Result.Error -> _state.value = UpdateTransactionUiState.Error(
                         message = result.exception.message ?: "Failed to load categories"
                     )
                 }
@@ -100,7 +100,7 @@ class UpdateTransactionViewModel @Inject constructor(
     }
 
     private fun updateTransaction() {
-        val currentState = _state.value as? UpdateTransactionState.Success ?: return
+        val currentState = _state.value as? UpdateTransactionUiState.Success ?: return
         val formData = currentState.transaction
         val validation = TransactionFormValidator.validateForm(formData)
 
@@ -110,14 +110,14 @@ class UpdateTransactionViewModel @Inject constructor(
         }
 
         viewModelScope.launch(dispatchers.io) {
-            _state.value = UpdateTransactionState.Loading
+            _state.value = UpdateTransactionUiState.Loading
 
             val amount = formData.amount.toBigDecimalOrNull() ?: return@launch
-            val transaction = fromFormData(
+            val transaction = TransactionFormMapper.fromFormData(
                 id = formData.id,
                 amount = amount,
                 description = formData.note ?: "",
-                date = parseDateString(formData.formattedDate),
+                date = DateMapper.parseDateString(formData.formattedDate),
                 type = formData.type,
                 categoryId = formData.category.id
             )
@@ -129,10 +129,10 @@ class UpdateTransactionViewModel @Inject constructor(
                     _sideEffect.send(UpdateTransactionSideEffect.ShowSnackbar("Transaction updated successfully"))
                     _sideEffect.send(UpdateTransactionSideEffect.NavigateBack)
                 }
-                is Result.Error -> _state.value = UpdateTransactionState.Error(
+                is Result.Error -> _state.value = UpdateTransactionUiState.Error(
                     message = updateTransaction.exception.message ?: "Failed to save transaction"
                 )
-                is Result.Loading -> _state.value = UpdateTransactionState.Loading
+                is Result.Loading -> _state.value = UpdateTransactionUiState.Loading
             }
         }
     }
@@ -144,8 +144,8 @@ class UpdateTransactionViewModel @Inject constructor(
     }
 
     override fun copySuccessState(
-        current: UpdateTransactionState.Success,
+        current: UpdateTransactionUiState.Success,
         transaction: TransactionUiModel,
-        validation: ValidationState
-    ): UpdateTransactionState.Success = current.copy(transaction = transaction, validation = validation)
+        validation: TransactionFormValidationState
+    ): UpdateTransactionUiState.Success = current.copy(transaction = transaction, validation = validation)
 } 

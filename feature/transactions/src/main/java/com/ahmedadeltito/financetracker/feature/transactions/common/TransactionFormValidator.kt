@@ -1,6 +1,6 @@
 package com.ahmedadeltito.financetracker.feature.transactions.common
 
-import com.ahmedadeltito.financetracker.ui.model.ValidationState
+import com.ahmedadeltito.financetracker.ui.model.TransactionFormValidationState
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 import java.math.BigDecimal
 
@@ -32,7 +32,7 @@ object TransactionFormValidator {
         else -> null
     }
 
-    fun validateForm(formData: TransactionUiModel): ValidationState = ValidationState(
+    fun validateForm(formData: TransactionUiModel): TransactionFormValidationState = TransactionFormValidationState(
         amountError = validateAmount(formData.amount),
         descriptionError = validateDescription(formData.note ?: ""),
         categoryError = validateCategory(formData.category.id),

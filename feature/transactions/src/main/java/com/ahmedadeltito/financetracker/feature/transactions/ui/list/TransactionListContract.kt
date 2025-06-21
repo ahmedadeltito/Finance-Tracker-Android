@@ -2,19 +2,19 @@ package com.ahmedadeltito.financetracker.feature.transactions.ui.list
 
 import com.ahmedadeltito.financetracker.ui.model.TransactionUiModel
 
-sealed interface TransactionListState {
-    data object Loading : TransactionListState
+sealed interface TransactionListUiState {
+    data object Loading : TransactionListUiState
 
     data class Success(
         val transactions: List<TransactionUiModel>,
         val totalIncome: String,
         val totalExpense: String,
         val balance: String
-    ) : TransactionListState
+    ) : TransactionListUiState
 
     data class Error(
         val message: String
-    ) : TransactionListState
+    ) : TransactionListUiState
 }
 
 sealed interface TransactionListEvent {

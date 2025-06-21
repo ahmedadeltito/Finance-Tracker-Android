@@ -5,6 +5,7 @@ import com.ahmedadeltito.financetracker.common.map
 import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.port.ExchangeRateProviderPort
 import com.ahmedadeltito.financetracker.feature.currencyconversion.domain.repository.ExchangeRateRepository
 import java.math.BigDecimal
+import java.math.RoundingMode
 import javax.inject.Inject
 
 class ExchangeRateRepositoryImpl @Inject constructor(
@@ -21,7 +22,10 @@ class ExchangeRateRepositoryImpl @Inject constructor(
         return provider.getRate(
             fromCurrencyCode = fromCurrencyCode,
             toCurrencyCode = toCurrencyCode
-        ).map { rate -> amount.multiply(rate) }
+        ).map { rate ->
+            val twoDecimal = rate.setScale(2, RoundingMode.FLOOR)
+            amount.multiply(twoDecimal)
+        }
     }
 
     override suspend fun getExchangeRatesProviders(): Result<List<Pair<String, String>>> =

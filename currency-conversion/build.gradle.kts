@@ -39,8 +39,6 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:ui"))
-    implementation(project(":core:navigation"))
-    implementation(project(":domain"))
 
     // AndroidX
     implementation(libs.androidx.core.ktx)

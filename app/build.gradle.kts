@@ -42,13 +42,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:common"))
-    implementation(project(":core:ui"))
     implementation(project(":core:navigation"))
     implementation(project(":data"))
-    implementation(project(":domain"))
-    implementation(project(":feature:transactions"))
-    implementation(project(":feature:currency-conversion"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
