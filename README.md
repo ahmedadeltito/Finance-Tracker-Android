@@ -12,6 +12,14 @@ The project is built upon a foundation of modern Android development best practi
 -   **MVVM & Unidirectional Data Flow (UDF)**: The presentation layer uses the Model-View-ViewModel pattern, where each screen follows a strict UDF contract (`State`, `Event`, `Effect`) for predictable state management.
 -   **Dependency Injection with Hilt**: Hilt is used to manage dependencies across the entire application, making the code more decoupled and testable.
 
+## Screenshots
+
+| Home                                       | Add Transaction                                |
+| ------------------------------------------ | ---------------------------------------------- |
+| ![Home Screen](screenshots/home.png)       | ![Add Transaction](screenshots/add.png)        |
+| **Update Transaction**                     | **Currency Conversion**                        |
+| ![Update Transaction](screenshots/update.png) | ![Currency Conversion](screenshots/currency_conversion.png) |
+
 ## Module Guide
 
 The project is organized into several modules, each with a specific responsibility. Click on a module name to view its detailed documentation.
